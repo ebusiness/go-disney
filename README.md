@@ -1,5 +1,9 @@
 ### disney navigation
 
+[![Build Status](https://travis-ci.org/ebusiness/go-disney.svg?branch=master)](https://travis-ci.org/ebusiness/go-disney)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ebusiness/go-disney)](https://goreportcard.com/report/github.com/ebusiness/go-disney)
+[![GoDoc](https://godoc.org/github.com/ebusiness/go-disney?status.svg)](https://godoc.org/github.com/ebusiness/go-disney)
+
  tokyo disney land/sea navigation
 
 - dependencies
