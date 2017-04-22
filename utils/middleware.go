@@ -1,0 +1,23 @@
+package utils
+
+import (
+	"github.com/gin-gonic/gin"
+
+	"github.com/ebusiness/go-disney/middleware"
+)
+
+var (
+	Route = gin.Default()
+	V1    *gin.RouterGroup //= Route.Group("/v1")
+)
+
+func init() {
+	// session
+	Route.Use(middleware.SessionRedisStore())
+	// mongo
+	Route.Use(middleware.MongoSession())
+	// version 1
+	V1 = Route.Group("/v1")
+
+	// V1.Use(middleware.SessionRedisStore())
+}
