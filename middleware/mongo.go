@@ -12,6 +12,7 @@ import (
 
 const sessionKey = "mongo"
 
+//MongoSession - MongoDB Session Storage for Connect Middleware
 func MongoSession() gin.HandlerFunc {
 	connString, database := getMongoServerAddress()
 	session, err := mgo.Dial(connString)
@@ -29,6 +30,7 @@ func MongoSession() gin.HandlerFunc {
 	}
 }
 
+//GetMongoSession - Get MongoDB Session Storage which saved by middleware
 func GetMongoSession(c *gin.Context) *mgo.Database {
 	return c.MustGet(sessionKey).(*mgo.Database)
 }

@@ -1,8 +1,8 @@
 package config
 
 const (
-	// cert path
+	//CertFilePath - cert path
 	CertFilePath = "./cert/cert.pem"
-	// key path
+	//KeyFilePath - key path
 	KeyFilePath = "./cert/key.pem"
 )

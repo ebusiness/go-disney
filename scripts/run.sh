@@ -11,31 +11,9 @@ docker run -it --rm \
       -p 8080:443 \
       -v $(pwd):/go/src/github.com/ebusiness/go-disney \
       golang:alpine sh -c '
-
 cd /go/src/github.com/ebusiness/go-disney
 
-echo "format"
-# go fmt ./...
-go fmt *.go
-go fmt config/*.go
-go fmt middleware/*.go
-go fmt utils/*.go
-go fmt v1/*.go
-go fmt v1/models/*.go
-
-echo "check vendor"
-if [[ ! -d /go/src/github.com/ebusiness/go-disney/vendor ]]; then
-  echo "get dep"
-
-  apk add --update git
-  go get -u github.com/golang/dep/...
-
-  # dep init
-  echo "ensure"
-
-  dep ensure
-  # dep ensure -update
-fi
+sh scripts/setup.sh
 
 echo "run"
 # dev

@@ -10,7 +10,7 @@ import (
 	"github.com/ebusiness/go-disney/config"
 )
 
-// the middleware of session store by Redis
+//SessionRedisStore - the middleware of session store by Redis
 func SessionRedisStore() gin.HandlerFunc {
 	//store := sessions.NewCookieStore([]byte("secret"))
 	store, err := sessions.NewRedisStore(10, "tcp", getRedisServerAddress(), "", []byte(config.SecretAes))

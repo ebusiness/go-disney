@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// regist all controllers of version 1
+//Regist - regist all controllers of version 1
 // just touch Regist(), it will be auto load all `init` function of this package's files
 func Regist() {
 	utils.V1.GET("/", index)

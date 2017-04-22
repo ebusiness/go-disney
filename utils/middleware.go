@@ -7,7 +7,9 @@ import (
 )
 
 var (
+	//Route - The engine of gin
 	Route = gin.Default()
+	//V1 - Route version 1
 	V1    *gin.RouterGroup //= Route.Group("/v1")
 )
 
