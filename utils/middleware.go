@@ -10,14 +10,14 @@ var (
 	//Route - The engine of gin
 	Route = gin.Default()
 	//V1 - Route version 1
-	V1    *gin.RouterGroup //= Route.Group("/v1")
+	V1 *gin.RouterGroup //= Route.Group("/v1")
 )
 
 func init() {
 	// session
-	Route.Use(middleware.SessionRedisStore())
+	Route.Use(middleware.SessionRedisStore)
 	// mongo
-	Route.Use(middleware.MongoSession())
+	Route.Use(middleware.MongoSession)
 	// version 1
 	V1 = Route.Group("/v1")
 

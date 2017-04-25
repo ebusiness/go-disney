@@ -16,13 +16,12 @@ import (
 func TestMongo_ReadWrite(t *testing.T) {
 	r := gin.Default()
 
-	r.Use(MongoSession())
+	r.Use(MongoSession)
 
 	r.GET("/test", func(c *gin.Context) {
-		db := GetMongoSession(c)
-
-		// db.C("test_people").Count()
-		collection := db.C("test_people")
+		mongo := GetMongo(c)
+		p := Person{}
+		collection := mongo.GetCollection(p)
 
 		testInsert(t, collection)
 		testFind(t, collection)
@@ -40,8 +39,8 @@ func testInsert(t *testing.T, collection *mgo.Collection) {
 	// t.Log("create test_people, and insert Ale && Cla")
 
 	err := collection.Insert(
-		&Person{"Ale", "+55 53 8116 9639"},
-		&Person{"Cla", "+55 53 8402 8510"},
+		&Person{Name: "Ale", Phone: "+55 53 8116 9639"},
+		&Person{Name: "Cla", Phone: "+55 53 8402 8510"},
 	)
 
 	if err != nil {
@@ -80,6 +79,7 @@ func testDrop(t *testing.T, collection *mgo.Collection) {
 }
 
 type Person struct {
-	Name  string
-	Phone string
+	collectionName string `collectionName:"test_people1"`
+	Name           string
+	Phone          string
 }

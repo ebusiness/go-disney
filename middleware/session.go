@@ -11,7 +11,7 @@ import (
 )
 
 //SessionRedisStore - the middleware of session store by Redis
-func SessionRedisStore() gin.HandlerFunc {
+var SessionRedisStore = func() gin.HandlerFunc {
 	//store := sessions.NewCookieStore([]byte("secret"))
 	store, err := sessions.NewRedisStore(10, "tcp", getRedisServerAddress(), "", []byte(config.SecretAes))
 	if err != nil {
@@ -21,7 +21,7 @@ func SessionRedisStore() gin.HandlerFunc {
 		MaxAge: config.MaxAge,
 	})
 	return sessions.Sessions(config.SessionKey, store)
-}
+}()
 
 func getRedisServerAddress() string {
 	redisServer := os.Getenv("REDISSERVER")

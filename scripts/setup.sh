@@ -1,9 +1,20 @@
 #!/bin/sh
 
-if ! which golint >/dev/null; then
+if ! command -v golint >/dev/null; then
+
+  if ! command -v git >/dev/null; then
+    echo "install git"
+    # alpine
+    apk add --update git
+
+  fi
+
   echo "install golint"
   go get -u github.com/golang/lint/golint
 fi
+
+# command -v golint >/dev/null 2>&1 || { echo >&2 "I require golint but it's not installed.  Aborting."; exit 1; }
+
 
 # golint ./...
 echo "golint"

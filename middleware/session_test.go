@@ -14,7 +14,7 @@ const value = "value"
 func TestRedis_SessionGetSet(t *testing.T) {
 	r := gin.Default()
 
-	r.Use(SessionRedisStore())
+	r.Use(SessionRedisStore)
 
 	r.GET("/set", func(c *gin.Context) {
 		session := sessions.Default(c)
