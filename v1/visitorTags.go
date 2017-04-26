@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/ebusiness/go-disney/utils"
 	"github.com/ebusiness/go-disney/middleware"
+	"github.com/ebusiness/go-disney/utils"
 	"github.com/ebusiness/go-disney/v1/models"
 )
 
