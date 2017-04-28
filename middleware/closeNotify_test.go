@@ -86,7 +86,8 @@ func (c *closeNotifyingRecorder) Size() int {
 }
 
 func (c *closeNotifyingRecorder) Status() int {
-	return c.Result().StatusCode
+	return c.Code
+	// return c.Result().StatusCode
 }
 
 func (c *closeNotifyingRecorder) WriteHeaderNow() {
