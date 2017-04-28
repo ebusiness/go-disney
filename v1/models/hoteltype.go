@@ -6,8 +6,7 @@ import (
 
 // HotelType -
 type HotelType struct {
-	collectionName string        `collectionName:"areas"`
+	collectionName string        `collectionName:"hoteltypes"`
 	ID             bson.ObjectId `bson:"_id"`
-	Place          string        `bson:"place"`
-	Language
+	Language       `bson:",inline"`
 }

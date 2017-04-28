@@ -27,7 +27,7 @@ func TestMongo_ReadWrite(t *testing.T) {
 		testFind(t, collection)
 		testDrop(t, collection)
 
-		c.String(200, "hello world!")
+		c.String(http.StatusOK, "hello world!")
 	})
 
 	res1 := httptest.NewRecorder()

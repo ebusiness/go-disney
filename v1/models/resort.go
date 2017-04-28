@@ -6,7 +6,7 @@ import (
 
 // Resort -
 type Resort struct {
-	collectionName string        `collectionName:"areas"`
+	collectionName string        `collectionName:"resorts"`
 	ID             bson.ObjectId `bson:"_id"`
-	Language
+	Language       `bson:",inline"`
 }

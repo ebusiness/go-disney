@@ -6,7 +6,7 @@ import (
 
 // Tag -
 type Tag struct {
-	collectionName string        `collectionName:"areas"`
+	collectionName string        `collectionName:"tags"`
 	ID             bson.ObjectId `bson:"_id"`
-	Language
+	Language       `bson:",inline"`
 }

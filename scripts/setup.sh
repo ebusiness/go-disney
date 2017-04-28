@@ -38,9 +38,18 @@ echo "check vendor"
 if [[ ! -d /go/src/github.com/ebusiness/go-disney/vendor ]]; then
   echo "get dep"
 
-  apk add --update git
-  go get -u github.com/golang/dep/...
+  if ! command -v dep >/dev/null; then
 
+    if ! command -v git >/dev/null; then
+      echo "install git"
+      # alpine
+      apk add --update git
+
+    fi
+
+    echo "install golint"
+    go get -u github.com/golang/dep/...
+  fi
   # dep init
   echo "ensure"
 

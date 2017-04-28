@@ -6,7 +6,7 @@ import (
 
 // Limited -
 type Limited struct {
-	collectionName string        `collectionName:"areas"`
+	collectionName string        `collectionName:"limiteds"`
 	ID             bson.ObjectId `bson:"_id"`
-	Language
+	Language       `bson:",inline"`
 }

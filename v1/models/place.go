@@ -6,7 +6,7 @@ import (
 
 // Place -
 type Place struct {
-	collectionName string        `collectionName:"areas"`
+	collectionName string        `collectionName:"places"`
 	ID             bson.ObjectId `bson:"_id"`
-	Language
+	Language       `bson:",inline"`
 }

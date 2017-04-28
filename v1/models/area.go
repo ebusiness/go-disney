@@ -8,6 +8,6 @@ import (
 type Area struct {
 	collectionName string        `collectionName:"areas"`
 	ID             bson.ObjectId `bson:"_id"`
-	Place          string        `bson:"place"`
+	Place          bson.ObjectId `bson:"place"`
 	Language       `bson:",inline"`
 }

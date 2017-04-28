@@ -20,7 +20,7 @@ func TestRedis_SessionGetSet(t *testing.T) {
 		session := sessions.Default(c)
 		session.Set("key", value)
 		session.Save()
-		c.String(200, value)
+		c.String(http.StatusOK, value)
 	})
 
 	r.GET("/get", func(c *gin.Context) {
@@ -29,7 +29,7 @@ func TestRedis_SessionGetSet(t *testing.T) {
 			t.Error("Session writing failed")
 		}
 		session.Save()
-		c.String(200, value)
+		c.String(http.StatusOK, value)
 	})
 
 	res1 := httptest.NewRecorder()

@@ -2,8 +2,8 @@ package models
 
 // Language -
 type Language struct {
-	Ja string `bson:"ja"`
-	En string `bson:"en"`
-	Cn string `bson:"cn"`
-	Tw string `bson:"tw"`
+	JA string `json:"ja" bson:"ja"`
+	EN string `json:"en" bson:"en"`
+	CN string `json:"cn" bson:"cn"`
+	TW string `json:"tw" bson:"tw"`
 }

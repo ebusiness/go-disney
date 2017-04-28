@@ -14,10 +14,8 @@ var (
 )
 
 func init() {
-	// session
-	Route.Use(middleware.SessionRedisStore)
-	// mongo
-	Route.Use(middleware.MongoSession)
+	// session && mongo
+	Route.Use(middleware.SessionRedisStore, middleware.MongoSession, middleware.CloseNotify)
 	// version 1
 	V1 = Route.Group("/v1")
 

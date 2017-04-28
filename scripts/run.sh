@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # docker run -d --name redis redis:alpine
+
+# mongo 3.4 ~
 # docker run -d --name mongo mvertes/alpine-mongo
 
 docker run -it --rm \

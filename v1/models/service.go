@@ -6,7 +6,7 @@ import (
 
 // Service -
 type Service struct {
-	collectionName string        `collectionName:"areas"`
+	collectionName string        `collectionName:"services"`
 	ID             bson.ObjectId `bson:"_id"`
-	Language
+	Language       `bson:",inline"`
 }
