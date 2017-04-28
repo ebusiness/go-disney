@@ -14,19 +14,37 @@ import (
 
 func init() {
 	control := attractionController{}
+	utils.V1.GET("/land/attractions", control.landlist)
+	utils.V1.GET("/sea/attractions", control.sealist)
 	utils.V1.GET("/attractions", control.list)
 	utils.V1.GET("/attractions/:id", control.detail)
 }
 
 type attractionController struct{}
 
+func (control attractionController) landlist(c *gin.Context) {
+	park := bson.M{"$match": bson.M{"park_kind": "1"}}
+	control.search(c, park)
+}
+
+func (control attractionController) sealist(c *gin.Context) {
+	park := bson.M{"$match": bson.M{"park_kind": "2"}}
+	control.search(c, park)
+}
+
 func (control attractionController) list(c *gin.Context) {
+	// park := bson.M{"$match": bson.M{"park_kind": bson.M{"$in": []string{"1", "2"}}}}
+	control.search(c)
+}
+
+func (control attractionController) search(c *gin.Context, bsons ...bson.M) {
 	models := []models.Attraction{}
 
 	mongo := middleware.GetMongo(c)
 	collection := mongo.GetCollection(models)
 
 	pipeline := (utils.BsonCreater{}).
+		Append(bsons...).
 		LookupWithUnwind("areas", "area", "_id", "area").
 		LookupWithUnwind("places", "park", "_id", "park").
 		// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
