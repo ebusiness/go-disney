@@ -1,12 +1,12 @@
 package v1
 
 import (
-	"github.com/gin-gonic/gin"
-	"gopkg.in/mgo.v2/bson"
-
 	"github.com/ebusiness/go-disney/middleware"
 	"github.com/ebusiness/go-disney/utils"
 	"github.com/ebusiness/go-disney/v1/models"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
 )
 
 //Regist - regist all controllers of version 1
@@ -17,10 +17,14 @@ func init() {
 
 func visitorIndex(c *gin.Context) {
 	models := []models.VisitorTag{}
-
 	mongo := middleware.GetMongo(c)
 	collection := mongo.GetCollection(models)
-	collection.Find(bson.M{}).All(&models)
 
-	c.JSON(200, models)
+	utils.SafelyExecutorForGin(c,
+		func() {
+			collection.Find(bson.M{}).All(&models)
+		},
+		func() {
+			c.JSON(http.StatusOK, models)
+		})
 }

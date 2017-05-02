@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"testing"
-
 	"github.com/ebusiness/go-disney/utils"
 	"github.com/ebusiness/go-disney/v1/models"
+	"testing"
 )
 
 // go test v1/attractions*.go -v

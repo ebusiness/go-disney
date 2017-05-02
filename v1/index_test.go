@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"testing"
-
 	"github.com/ebusiness/go-disney/utils"
+	"testing"
 )
 
 // go test v1/index*.go -v

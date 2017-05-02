@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"testing"
-
 	"github.com/ebusiness/go-disney/utils"
 	"github.com/ebusiness/go-disney/v1/models"
+	"testing"
 )
 
 // go test v1/attractions*.go -v
@@ -19,7 +18,7 @@ func TestRealtime(t *testing.T) {
 		// travis-ci has no data
 		return
 	}
-  // t.Log(models[0].StrID)
+	// t.Log(models[0].StrID)
 	testWaittime(t, models[0].StrID)
 }
 

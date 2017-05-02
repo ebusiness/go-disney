@@ -1,15 +1,12 @@
 package v1
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"gopkg.in/mgo.v2/bson"
-
 	"github.com/ebusiness/go-disney/middleware"
 	"github.com/ebusiness/go-disney/utils"
 	"github.com/ebusiness/go-disney/v1/models"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
 )
 
 func init() {
@@ -39,31 +36,25 @@ func (control attractionController) list(c *gin.Context) {
 
 func (control attractionController) search(c *gin.Context, bsons ...bson.M) {
 	models := []models.Attraction{}
-
 	mongo := middleware.GetMongo(c)
 	collection := mongo.GetCollection(models)
+	var pipeline []bson.M
 
-	pipeline := (utils.BsonCreater{}).
-		Append(bsons...).
-		LookupWithUnwind("areas", "area", "_id", "area").
-		LookupWithUnwind("places", "park", "_id", "park").
-		// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
-		Pipeline
-
-	if c.IsAborted() {
-		return
-	}
-	collection.Pipe(pipeline).All(&models)
-
-	if c.IsAborted() {
-		return
-	}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println("something wrong", err)
-	// 	}
-	// }()
-	c.JSON(http.StatusOK, models)
+	utils.SafelyExecutorForGin(c,
+		func() {
+			pipeline = (utils.BsonCreater{}).
+				Append(bsons...).
+				LookupWithUnwind("areas", "area", "_id", "area").
+				LookupWithUnwind("places", "park", "_id", "park").
+				// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
+				Pipeline
+		},
+		func() {
+			collection.Pipe(pipeline).All(&models)
+		},
+		func() {
+			c.JSON(http.StatusOK, models)
+		})
 }
 
 func (control attractionController) detail(c *gin.Context) {
@@ -72,31 +63,31 @@ func (control attractionController) detail(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	log.Println(id)
 
 	model := models.Attraction{}
 	mongo := middleware.GetMongo(c)
 	collection := mongo.GetCollection(model)
+	var pipeline []bson.M
 
-	basonMatchID := bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(id)}}
-	tempRoot := bson.M{"$addFields": bson.M{"old": "$$ROOT"}}
-
-	pipeline := (utils.BsonCreater{}).
-		Append(basonMatchID).
-		LookupWithUnwind("areas", "area", "_id", "area").
-		LookupWithUnwind("places", "park", "_id", "park").
-		GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
-		Append(tempRoot).
-		Append(control.lookupSummaryTags()...).
-		Pipeline
-	if c.IsAborted() {
-		return
-	}
-	collection.Pipe(pipeline).One(&model)
-	if c.IsAborted() {
-		return
-	}
-	c.JSON(http.StatusOK, model)
+	utils.SafelyExecutorForGin(c,
+		func() {
+			basonMatchID := bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(id)}}
+			tempRoot := bson.M{"$addFields": bson.M{"old": "$$ROOT"}}
+			pipeline = (utils.BsonCreater{}).
+				Append(basonMatchID).
+				LookupWithUnwind("areas", "area", "_id", "area").
+				LookupWithUnwind("places", "park", "_id", "park").
+				GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
+				Append(tempRoot).
+				Append(control.lookupSummaryTags()...).
+				Pipeline
+		},
+		func() {
+			collection.Pipe(pipeline).One(&model)
+		},
+		func() {
+			c.JSON(http.StatusOK, model)
+		})
 }
 
 func (control attractionController) lookupSummaryTags() []bson.M {
