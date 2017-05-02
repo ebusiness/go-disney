@@ -47,7 +47,7 @@ if [[ ! -d /go/src/github.com/ebusiness/go-disney/vendor ]]; then
 
     fi
 
-    echo "install golint"
+    echo "install dep"
     go get -u github.com/golang/dep/...
   fi
   # dep init
