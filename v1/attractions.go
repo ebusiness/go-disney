@@ -45,7 +45,7 @@ func (control attractionController) search(c *gin.Context, bsons ...bson.M) {
 			pipeline = (utils.BsonCreater{}).
 				Append(bsons...).
 				LookupWithUnwind("areas", "area", "_id", "area").
-				LookupWithUnwind("places", "park", "_id", "park").
+				// LookupWithUnwind("places", "park", "_id", "park").
 				// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
 				Pipeline
 		},
@@ -56,7 +56,6 @@ func (control attractionController) search(c *gin.Context, bsons ...bson.M) {
 			c.JSON(http.StatusOK, models)
 		})
 }
-
 func (control attractionController) detail(c *gin.Context) {
 	id := c.Param("id")
 	if len(id) < 1 || !bson.IsObjectIdHex(id) {
