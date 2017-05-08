@@ -1,18 +1,17 @@
 language: go
 sudo: false
 go:
-  - 1.4
-  - 1.5.4
-  - 1.6.4
-  - 1.7.4
+  - 1.7.x
+  - 1.8.x
   - tip
 
 services:
-  - docker
+  - redis-server
+  - mongodb
 
-before_install:
-- docker run -d --name redis -p 6379:6379 redis:alpine
-- docker run -d --name mongo -p 27017:27017 mvertes/alpine-mongo
+# before_install:
+# - docker run -d --name redis -p 6379:6379 redis:alpine
+# - docker run -d --name mongo -p 27017:27017 mvertes/alpine-mongo
 
 script:
   - go test -v middleware/*.go
