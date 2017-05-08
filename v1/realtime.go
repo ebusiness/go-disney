@@ -62,14 +62,14 @@ func (control realtimeController) search(c *gin.Context, bsons ...bson.M) {
 			pipeline = (utils.BsonCreater{}).
 				Append(bson.M{"$sort": bson.M{"_id": 1, "createTime": 1, "updateTime": 1}}).
 				Append(matchToday, addFields, group).
-				LookupWithUnwind("attractions", "_id", "str_id", "base").
+				LookupWithUnwind("attractions", "_id", "str_id", "base", "").
 				Append(bsons...).
 				Append(bson.M{
 					"$addFields": bson.M{
 						"base.realtime": "$realtime",
 					},
 				}, bson.M{"$replaceRoot": bson.M{"newRoot": "$base"}}).
-				LookupWithUnwind("areas", "area", "_id", "area").
+				LookupWithUnwind("areas", "area", "_id", "area", "").
 				Pipeline
 		},
 		func() {

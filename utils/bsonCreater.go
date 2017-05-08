@@ -20,34 +20,33 @@ func (bc BsonCreater) Append(ms ...bson.M) BsonCreater {
 
 // Lookup without unwind will find a slice document (array)
 func (bc BsonCreater) Lookup(from, localField, foreignField, as string) BsonCreater {
-	return bc.lookup(from, localField, foreignField, as, false)
-}
-
-// LookupWithUnwind will find single document, not a slice
-func (bc BsonCreater) LookupWithUnwind(from, localField, foreignField, as string) BsonCreater {
-	return bc.lookup(from, localField, foreignField, as, true)
-}
-
-// lookup Performs a left outer join to an unsharded collection in the same database to filter in documents from the “joined” collection for processing.
-func (bc BsonCreater) lookup(from, localField, foreignField, as string, withUnwind bool) BsonCreater {
-	lookup := bson.M{
+	return bc.Append(bson.M{
 		"$lookup": bson.M{
 			"from":         from,
 			"localField":   localField,
 			"foreignField": foreignField,
 			"as":           as,
 		},
+	})
+}
+
+// LookupWithUnwind will find single document, not a slice
+func (bc BsonCreater) LookupWithUnwind(from, localField, foreignField, as, lang string) BsonCreater {
+	if len(lang) == 0 {
+		return bc.Lookup(from, localField, foreignField, as).
+			Append(bson.M{"$unwind": "$" + as})
 	}
 
-	if withUnwind {
-		return bc.Append(lookup, bson.M{"$unwind": "$" + as})
-	}
-	return bc.Append(lookup)
+	return bc.Append(bson.M{"$addFields": bson.M{"old": "$$ROOT"}}).
+		Lookup(from, localField, foreignField, as).
+		Append(bson.M{"$unwind": "$" + as}).
+		Append(bson.M{"$addFields": bson.M{"old." + as: "$" + as + "." + lang}}).
+		Append(bson.M{"$replaceRoot": bson.M{"newRoot": "$old"}})
 }
 
 // GraphLookup Performs a recursive search on a collection,
 // with options for restricting the search by recursion depth and query filter.
-func (bc BsonCreater) GraphLookup(from, startWith, connectFromField, connectToField, as string) BsonCreater {
+func (bc BsonCreater) GraphLookup(from, startWith, connectFromField, connectToField, as, lang string) BsonCreater {
 	graphLookup := bson.M{
 		"$graphLookup": bson.M{
 			"from":             from,
@@ -57,5 +56,11 @@ func (bc BsonCreater) GraphLookup(from, startWith, connectFromField, connectToFi
 			"as":               as,
 		},
 	}
-	return bc.Append(graphLookup)
+	if len(lang) == 0 {
+		return bc.Append(graphLookup)
+	}
+	return bc.Append(bson.M{"$addFields": bson.M{"old": "$$ROOT"}}).
+		Append(graphLookup).
+		Append(bson.M{"$addFields": bson.M{"old." + as: "$" + as + "." + lang}}).
+		Append(bson.M{"$replaceRoot": bson.M{"newRoot": "$old"}})
 }
