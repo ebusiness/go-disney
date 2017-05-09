@@ -33,6 +33,7 @@ func (control attractionController) commonProject(c *gin.Context, custom bson.M)
 		"area":             1,
 		"is_lottery":       1,
 		"is_must_book":     1,
+		"category":         1,
 		"waitTime":         1,
 		"note":             "$note." + control.lang,
 		"introductions":    "$introductions." + control.lang,
@@ -78,7 +79,7 @@ func (control attractionController) search(c *gin.Context, conditions ...bson.M)
 
 func (control attractionController) detail(c *gin.Context) {
 	control.initialization(c)
-	if len(control.id) < 1 || !bson.IsObjectIdHex(control.id) {
+	if len(control.id) < 1 { //|| !bson.IsObjectIdHex(control.id) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
@@ -90,7 +91,7 @@ func (control attractionController) detail(c *gin.Context) {
 
 	utils.SafelyExecutorForGin(c,
 		func() {
-			basonMatchID := bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(control.id)}}
+			basonMatchID := bson.M{"$match": bson.M{"str_id": control.id}} //bson.ObjectIdHex(control.id)}}
 			project := control.commonProject(c, bson.M{"tag_ids": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
 
 			pipeline = (utils.BsonCreater{}).

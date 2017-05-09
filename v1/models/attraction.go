@@ -11,6 +11,7 @@ type Attraction struct {
 	ID             bson.ObjectId `json:"_id" bson:"_id"`
 	StrID          string        `json:"str_id" bson:"str_id"`
 	AreaName       string        `json:"area" bson:"area"`
+	Category       string        `json:"category" bson:"category"`
 	Park           Place         `json:"park" bson:"park"`
 	ThumURL        string        `json:"thum_url_pc" bson:"thum_url_pc"`
 	YoutubeURL     string        `json:"youtube_url,omitempty" bson:"youtube_url,omitempty"`
