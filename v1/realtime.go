@@ -12,30 +12,21 @@ import (
 
 func init() {
 	control := realtimeController{}
-	utils.V1.GET("/land/realtime", control.landlist)
-	utils.V1.GET("/sea/realtime", control.sealist)
 	utils.V1.GET("/realtime", control.list)
-	utils.V1.GET("/waittimes/:id", control.waittimes)
+	utils.V1.GET("/attractions/:id/waittimes", control.waittimes)
 }
 
-type realtimeController struct{}
-
-func (control realtimeController) landlist(c *gin.Context) {
-	park := bson.M{"$match": bson.M{"base.park_kind": "1"}}
-	control.search(c, park)
-}
-
-func (control realtimeController) sealist(c *gin.Context) {
-	park := bson.M{"$match": bson.M{"base.park_kind": "2"}}
-	control.search(c, park)
+type realtimeController struct {
+	baseController
 }
 
 func (control realtimeController) list(c *gin.Context) {
-	// park := bson.M{"$match": bson.M{"park_kind": bson.M{"$in": []string{"1", "2"}}}}
-	control.search(c)
+	control.initialization(c)
+	conditions := bson.M{"$match": bson.M{"base.park_kind": control.park}}
+	control.search(c, conditions)
 }
 
-func (control realtimeController) search(c *gin.Context, bsons ...bson.M) {
+func (control realtimeController) search(c *gin.Context, conditions ...bson.M) {
 	models := []models.Realtime{}
 	mongo := middleware.GetMongo(c)
 	collection := mongo.GetCollection(models)
@@ -63,7 +54,7 @@ func (control realtimeController) search(c *gin.Context, bsons ...bson.M) {
 				Append(bson.M{"$sort": bson.M{"_id": 1, "createTime": 1, "updateTime": 1}}).
 				Append(matchToday, addFields, group).
 				LookupWithUnwind("attractions", "_id", "str_id", "base", "").
-				Append(bsons...).
+				Append(conditions...).
 				Append(bson.M{
 					"$addFields": bson.M{
 						"base.realtime": "$realtime",

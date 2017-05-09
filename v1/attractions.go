@@ -33,6 +33,7 @@ func (control attractionController) commonProject(c *gin.Context, custom bson.M)
 		"area":             1,
 		"is_lottery":       1,
 		"is_must_book":     1,
+		"waitTime":         1,
 		"note":             "$note." + control.lang,
 		"introductions":    "$introductions." + control.lang,
 		"name":             "$name." + control.lang,
@@ -49,10 +50,10 @@ func (control attractionController) list(c *gin.Context) {
 	conditions := append([]bson.M{},
 		bson.M{"$match": bson.M{"park_kind": control.park}},
 		control.commonProject(c, nil))
-	control.search(c, control.lang, conditions...)
+	control.search(c, conditions...)
 }
 
-func (control attractionController) search(c *gin.Context, lang string, conditions ...bson.M) {
+func (control attractionController) search(c *gin.Context, conditions ...bson.M) {
 	models := []models.Attraction{}
 	mongo := middleware.GetMongo(c)
 	collection := mongo.GetCollection(models)
@@ -62,7 +63,7 @@ func (control attractionController) search(c *gin.Context, lang string, conditio
 		func() {
 			pipeline = (utils.BsonCreater{}).
 				Append(conditions...).
-				LookupWithUnwind("areas", "area", "_id", "area", lang).
+				LookupWithUnwind("areas", "area", "_id", "area", control.lang).
 				// LookupWithUnwind("places", "park", "_id", "park", lang).
 				// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
 				Pipeline

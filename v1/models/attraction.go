@@ -1,6 +1,7 @@
 package models
 
 import (
+	// "time"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -24,6 +25,7 @@ type Attraction struct {
 	Note           string        `json:"note" bson:"note"`
 	Introductions  string        `json:"introductions" bson:"introductions"`
 	Summaries      []summary     `json:"summaries,omitempty" bson:"summaries,omitempty"`
+	WaitTime       interface{}   `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
 }
 
 type summaryTag struct {
@@ -35,3 +37,18 @@ type summary struct {
 	Body  string `json:"body,omitempty" bson:"body,omitempty"`
 	Title string `json:"title,omitempty" bson:"title,omitempty"`
 }
+
+// type waitTime struct {
+// 	WaitTime          string     `json:"waitTime" bson:"waitTime,omitempty"`
+// 	Available         bool       `json:"available" bson:"available"`
+// 	StatusInfo        string     `json:"statusInfo" bson:"statusInfo,omitempty"`
+// 	FastpassAvailable bool       `json:"fastpassAvailable" bson:"fastpassAvailable"`
+// 	FastpassInfo      string     `json:"fastpassInfo" bson:"fastpassInfo,omitempty"`
+// 	UpdateTime        *time.Time `json:"updateTime" bson:"updateTime"`
+//
+// 	OperationStart *time.Time `json:"operation_start" bson:"operation_start,omitempty"`
+// 	OperationEnd   *time.Time `json:"operation_end" bson:"operation_end,omitempty"`
+// 	FastpassStart  *time.Time `json:"fastpass_start" bson:"fastpass_start,omitempty"`
+// 	FastpassEnd    *time.Time `json:"fastpass_end" bson:"fastpass_end,omitempty"`
+// 	CreateTime     *time.Time  `json:"createTime" bson:"createTime"`
+// }

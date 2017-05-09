@@ -9,8 +9,9 @@ import (
 // go test v1/attractions*.go -v
 func TestVisitorIndex(t *testing.T) {
 
+	control := visitorController{}
 	models := []models.VisitorTag{}
-	utils.CreaterTestForHTTP(t, "/test", "/test", visitorIndex, &models)
+	utils.CreaterTestForHTTP(t, "/test", "/test", control.tags, &models)
 
 	if len(models) < 1 {
 		// t.Fatalf("NoData")

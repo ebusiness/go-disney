@@ -9,20 +9,31 @@ import (
 	"net/http"
 )
 
-//Regist - regist all controllers of version 1
-// just touch Regist(), it will be auto load all `init` function of this package's files
 func init() {
-	utils.V1.GET("/visitor/tags", visitorIndex)
+	control := visitorController{}
+	utils.V1.GET("/visitor/tags", control.tags)
 }
 
-func visitorIndex(c *gin.Context) {
+type visitorController struct {
+	baseController
+}
+
+func (control visitorController) tags(c *gin.Context) {
+	control.initialization(c)
 	models := []models.VisitorTag{}
 	mongo := middleware.GetMongo(c)
 	collection := mongo.GetCollection(models)
 
+	var pipeline []bson.M
+
 	utils.SafelyExecutorForGin(c,
 		func() {
-			collection.Find(bson.M{}).All(&models)
+			pipeline = (utils.BsonCreater{}).
+				Append(bson.M{"$addFields": bson.M{"name": "$" + control.lang}}).
+				Pipeline
+		},
+		func() {
+			collection.Pipe(pipeline).All(&models)
 		},
 		func() {
 			c.JSON(http.StatusOK, models)
