@@ -49,7 +49,7 @@ func (control attractionController) commonProject(c *gin.Context, custom bson.M)
 func (control attractionController) list(c *gin.Context) {
 	control.initialization(c)
 	conditions := append([]bson.M{},
-		bson.M{"$match": bson.M{"park_kind": control.park}},
+		bson.M{"$match": bson.M{"park_kind": control.park, "name." + control.lang: bson.M{"$ne": ""}}},
 		control.commonProject(c, nil))
 	control.search(c, conditions...)
 }
