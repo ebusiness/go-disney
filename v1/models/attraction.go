@@ -18,6 +18,8 @@ type Attraction struct {
 	TagNames       []string      `json:"tags,omitempty" bson:"tags,omitempty"`
 	Images         []string      `json:"images" bson:"main_visual_urls"`
 	IsFastpass     bool          `json:"is_fastpass" bson:"is_fastpass"`
+	IsLottery      bool          `json:"is_lottery" bson:"is_lottery"`
+	IsMustBook     bool          `json:"is_must_book" bson:"is_must_book"`
 	Name           string        `json:"name" bson:"name"`
 	Note           string        `json:"note" bson:"note"`
 	Introductions  string        `json:"introductions" bson:"introductions"`
@@ -30,6 +32,6 @@ type summaryTag struct {
 }
 
 type summary struct {
-	Body  string `json:"body" bson:"body"`
-	Title string `json:"title" bson:"title"`
+	Body  string `json:"body,omitempty" bson:"body,omitempty"`
+	Title string `json:"title,omitempty" bson:"title,omitempty"`
 }

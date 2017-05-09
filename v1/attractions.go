@@ -30,10 +30,12 @@ func (control attractionController) commonProject(c *gin.Context, custom bson.M)
 		"is_fastpass":      1,
 		"thum_url_pc":      1,
 		"maps":             1,
+		"area":             1,
+		"is_lottery":       1,
+		"is_must_book":     1,
 		"note":             "$note." + control.lang,
 		"introductions":    "$introductions." + control.lang,
 		"name":             "$name." + control.lang,
-		"area":             1,
 	}
 
 	for bsonkey, bsonvalue := range custom {
@@ -85,12 +87,10 @@ func (control attractionController) detail(c *gin.Context) {
 	collection := mongo.GetCollection(model)
 	var pipeline []bson.M
 
-	// result := bson.M{}
-
 	utils.SafelyExecutorForGin(c,
 		func() {
 			basonMatchID := bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(control.id)}}
-			project := control.commonProject(c, bson.M{"tag_ids": 1, "summary_tag_ids": 1, "summaries": 1})
+			project := control.commonProject(c, bson.M{"tag_ids": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
 
 			pipeline = (utils.BsonCreater{}).
 				Append(basonMatchID, project).
@@ -134,20 +134,32 @@ func (control attractionController) lookupSummaryTags() []bson.M {
 		Append(bson.M{"$project": bson.M{"_id": 1, "old": 1, "type": "$type", "tags": "$tags", "typeid": "$summary_tag_ids.typeid"}}).
 		Append(groupByRootIDAndTypeID).
 		Append(groupByRootID).
-		Append(bson.M{"$unwind": "$old.summaries"}).
+		Append(bson.M{"$unwind": bson.M{"path": "$old.summaries", "preserveNullAndEmptyArrays": true}}).
 		Append(bson.M{
 			"$group": bson.M{
-				"_id": "$_id",
-				"old": bson.M{"$first": "$old"},
+				"_id":          "$_id",
+				"old":          bson.M{"$first": "$old"},
+				"summary_tags": bson.M{"$first": "$summary_tags"},
 				"summaries": bson.M{
-					"$push": bson.M{
-						"body":  "$old.summaries.body.cn",
-						"title": "$old.summaries.title.cn",
+					"$addToSet": bson.M{
+						"body":  "$old.summaries.body." + control.lang,
+						"title": "$old.summaries.title." + control.lang,
 					},
 				},
 			},
 		}).
-		Append(bson.M{"$addFields": bson.M{"old.summary_tags": "$summary_tags", "old.summaries": "$summaries"}}).
+		Append(bson.M{"$addFields": bson.M{"old.summary_tags": "$summary_tags", "old.summaries": bson.M{
+			"$cond": bson.M{
+				"if": bson.M{"$eq": []interface{}{
+					0, bson.M{
+						"$size": "$summaries.body",
+					},
+				},
+				},
+				"then": nil,
+				"else": "$summaries",
+			},
+		}}}).
 		Append(bson.M{"$replaceRoot": bson.M{"newRoot": "$old"}}).
 		Pipeline
 }
