@@ -34,7 +34,7 @@ func (control attractionController) commonProject(c *gin.Context, custom bson.M)
 		"is_lottery":       1,
 		"is_must_book":     1,
 		"category":         1,
-		"waitTime":         1,
+		"realtime":         1,
 		"note":             "$note." + control.lang,
 		"introductions":    "$introductions." + control.lang,
 		"name":             "$name." + control.lang,
@@ -62,7 +62,7 @@ func (control attractionController) search(c *gin.Context, conditions ...bson.M)
 
 	utils.SafelyExecutorForGin(c,
 		func() {
-			pipeline = (utils.BsonCreater{}).
+			pipeline = (utils.BsonCreator{}).
 				Append(conditions...).
 				LookupWithUnwind("areas", "area", "_id", "area", control.lang).
 				// LookupWithUnwind("places", "park", "_id", "park", lang).
@@ -94,7 +94,7 @@ func (control attractionController) detail(c *gin.Context) {
 			basonMatchID := bson.M{"$match": bson.M{"str_id": control.id}} //bson.ObjectIdHex(control.id)}}
 			project := control.commonProject(c, bson.M{"tag_ids": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
 
-			pipeline = (utils.BsonCreater{}).
+			pipeline = (utils.BsonCreator{}).
 				Append(basonMatchID, project).
 				LookupWithUnwind("areas", "area", "_id", "area", control.lang).
 				// LookupWithUnwind("places", "park", "_id", "park", control.lang).
@@ -129,7 +129,7 @@ func (control attractionController) lookupSummaryTags() []bson.M {
 			},
 		},
 	}
-	return (utils.BsonCreater{}).Append(bson.M{"$addFields": bson.M{"old": "$$ROOT"}}).
+	return (utils.BsonCreator{}).Append(bson.M{"$addFields": bson.M{"old": "$$ROOT"}}).
 		Append(bson.M{"$unwind": "$summary_tag_ids"}).
 		LookupWithUnwind("tagtypes", "summary_tag_ids.typeid", "_id", "type", control.lang).
 		LookupWithUnwind("tags", "summary_tag_ids.tagIds", "_id", "tags", control.lang).

@@ -4,13 +4,13 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// BsonCreater is a bson creater (without pointer)
-type BsonCreater struct {
+// BsonCreator is a bson creator (without pointer)
+type BsonCreator struct {
 	Pipeline []bson.M
 }
 
 // Append the slice of bson.M
-func (bc BsonCreater) Append(ms ...bson.M) BsonCreater {
+func (bc BsonCreator) Append(ms ...bson.M) BsonCreator {
 	if bc.Pipeline == nil {
 		bc.Pipeline = []bson.M{}
 	}
@@ -19,7 +19,7 @@ func (bc BsonCreater) Append(ms ...bson.M) BsonCreater {
 }
 
 // Lookup without unwind will find a slice document (array)
-func (bc BsonCreater) Lookup(from, localField, foreignField, as string) BsonCreater {
+func (bc BsonCreator) Lookup(from, localField, foreignField, as string) BsonCreator {
 	return bc.Append(bson.M{
 		"$lookup": bson.M{
 			"from":         from,
@@ -31,7 +31,7 @@ func (bc BsonCreater) Lookup(from, localField, foreignField, as string) BsonCrea
 }
 
 // LookupWithUnwind will find single document, not a slice
-func (bc BsonCreater) LookupWithUnwind(from, localField, foreignField, as, lang string) BsonCreater {
+func (bc BsonCreator) LookupWithUnwind(from, localField, foreignField, as, lang string) BsonCreator {
 	if len(lang) == 0 {
 		return bc.Lookup(from, localField, foreignField, as).
 			Append(bson.M{"$unwind": "$" + as})
@@ -46,7 +46,7 @@ func (bc BsonCreater) LookupWithUnwind(from, localField, foreignField, as, lang 
 
 // GraphLookup Performs a recursive search on a collection,
 // with options for restricting the search by recursion depth and query filter.
-func (bc BsonCreater) GraphLookup(from, startWith, connectFromField, connectToField, as, lang string) BsonCreater {
+func (bc BsonCreator) GraphLookup(from, startWith, connectFromField, connectToField, as, lang string) BsonCreator {
 	graphLookup := bson.M{
 		"$graphLookup": bson.M{
 			"from":             from,

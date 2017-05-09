@@ -28,7 +28,7 @@ func (control visitorController) tags(c *gin.Context) {
 
 	utils.SafelyExecutorForGin(c,
 		func() {
-			pipeline = (utils.BsonCreater{}).
+			pipeline = (utils.BsonCreator{}).
 				Append(bson.M{"$addFields": bson.M{"name": "$" + control.lang}}).
 				Pipeline
 		},

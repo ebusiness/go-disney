@@ -50,7 +50,7 @@ func (control realtimeController) search(c *gin.Context, conditions ...bson.M) {
 				},
 			}
 
-			pipeline = (utils.BsonCreater{}).
+			pipeline = (utils.BsonCreator{}).
 				Append(bson.M{"$sort": bson.M{"_id": 1, "createTime": 1, "updateTime": 1}}).
 				Append(matchToday, addFields, group).
 				LookupWithUnwind("attractions", "_id", "str_id", "base", "").

@@ -1,32 +1,32 @@
 package models
 
 import (
-	// "time"
-	"gopkg.in/mgo.v2/bson"
+// "time"
+// "gopkg.in/mgo.v2/bson"
 )
 
 // Attraction -
 type Attraction struct {
-	collectionName string        `collectionName:"attractions"`
-	ID             bson.ObjectId `json:"_id" bson:"_id"`
-	StrID          string        `json:"str_id" bson:"str_id"`
-	AreaName       string        `json:"area" bson:"area"`
-	Category       string        `json:"category" bson:"category"`
-	Park           Place         `json:"park" bson:"park"`
-	ThumURL        string        `json:"thum_url_pc" bson:"thum_url_pc"`
-	YoutubeURL     string        `json:"youtube_url,omitempty" bson:"youtube_url,omitempty"`
-	SummaryTag     []summaryTag  `json:"summary_tags,omitempty" bson:"summary_tags,omitempty"`
-	Maps           []string      `json:"maps" bson:"maps"`
-	TagNames       []string      `json:"tags,omitempty" bson:"tags,omitempty"`
-	Images         []string      `json:"images" bson:"main_visual_urls"`
-	IsFastpass     bool          `json:"is_fastpass" bson:"is_fastpass"`
-	IsLottery      bool          `json:"is_lottery" bson:"is_lottery"`
-	IsMustBook     bool          `json:"is_must_book" bson:"is_must_book"`
-	Name           string        `json:"name" bson:"name"`
-	Note           string        `json:"note" bson:"note"`
-	Introductions  string        `json:"introductions" bson:"introductions"`
-	Summaries      []summary     `json:"summaries,omitempty" bson:"summaries,omitempty"`
-	WaitTime       interface{}   `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
+	collectionName string `collectionName:"attractions"`
+	// ID             bson.ObjectId `json:"_id" bson:"_id"`
+	// Park          Place        `json:"park" bson:"park"`
+	StrID         string       `json:"str_id" bson:"str_id"`
+	AreaName      string       `json:"area" bson:"area"`
+	Category      string       `json:"category" bson:"category"`
+	ThumURL       string       `json:"thum_url_pc" bson:"thum_url_pc"`
+	YoutubeURL    string       `json:"youtube_url,omitempty" bson:"youtube_url,omitempty"`
+	SummaryTag    []summaryTag `json:"summary_tags,omitempty" bson:"summary_tags,omitempty"`
+	Maps          []string     `json:"maps,omitempty" bson:"maps,omitempty"`
+	TagNames      []string     `json:"tags,omitempty" bson:"tags,omitempty"`
+	Images        []string     `json:"images" bson:"main_visual_urls"`
+	IsFastpass    bool         `json:"is_fastpass" bson:"is_fastpass"`
+	IsLottery     bool         `json:"is_lottery" bson:"is_lottery"`
+	IsMustBook    bool         `json:"is_must_book" bson:"is_must_book"`
+	Name          string       `json:"name,omitempty" bson:"name,omitempty"`
+	Note          string       `json:"note,omitempty" bson:"note,omitempty"`
+	Introductions string       `json:"introductions,omitempty" bson:"introductions,omitempty"`
+	Summaries     []summary    `json:"summaries,omitempty" bson:"summaries,omitempty"`
+	Realtime      interface{}  `json:"realtime,omitempty" bson:"realtime,omitempty"`
 }
 
 type summaryTag struct {
