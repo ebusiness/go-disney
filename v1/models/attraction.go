@@ -13,6 +13,7 @@ type Attraction struct {
 	StrID         string       `json:"str_id" bson:"str_id"`
 	AreaName      string       `json:"area" bson:"area"`
 	Category      string       `json:"category" bson:"category"`
+	IsAvailable   bool         `json:"is_available" bson:"is_available"`
 	ThumURL       string       `json:"thum_url_pc" bson:"thum_url_pc"`
 	YoutubeURL    string       `json:"youtube_url,omitempty" bson:"youtube_url,omitempty"`
 	SummaryTag    []summaryTag `json:"summary_tags,omitempty" bson:"summary_tags,omitempty"`

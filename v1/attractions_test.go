@@ -18,7 +18,7 @@ func TestAttractions(t *testing.T) {
 		// travis-ci has no data
 		return
 	}
-	testAttractionsDetail(t, models[0].ID.Hex())
+	testAttractionsDetail(t, models[0].StrID)
 }
 
 func testAttractionsDetail(t *testing.T, id string) {

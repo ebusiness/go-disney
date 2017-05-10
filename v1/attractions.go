@@ -34,6 +34,7 @@ func (control attractionController) commonProject(c *gin.Context, custom bson.M)
 		"is_lottery":       1,
 		"is_must_book":     1,
 		"category":         1,
+		"is_available":     1,
 		"realtime":         1,
 		"note":             "$note." + control.lang,
 		"introductions":    "$introductions." + control.lang,
