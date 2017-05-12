@@ -225,8 +225,8 @@ func (control attractionController) getRealtimeWaittimes(c *gin.Context, datetim
 					"$match": bson.M{
 						"str_id": control.id,
 						"createTime": bson.M{
-							"$gt": time.Date(datetime.Year(), datetime.Month(), datetime.Day(), 0, 0, 0, 0, jst),
-							"$lt": time.Date(nextDay.Year(), nextDay.Month(), nextDay.Day(), 0, 0, 0, 0, jst),
+							"$gt": utils.DatetimeOfDate(datetime),
+							"$lt": utils.DatetimeOfDate(nextDay),
 						},
 					},
 				},
