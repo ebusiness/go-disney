@@ -19,6 +19,7 @@ func TestAttractions(t *testing.T) {
 		return
 	}
 	testAttractionsDetail(t, models[0].StrID)
+	testWaittime(t, models[0].StrID)
 }
 
 func testAttractionsDetail(t *testing.T, id string) {
@@ -26,6 +27,17 @@ func testAttractionsDetail(t *testing.T, id string) {
 	control := attractionController{}
 	model := models.Attraction{}
 	utils.CreaterTestForHTTP(t, "/test/:id", "/test/"+id, control.detail, &model)
+
+	// t.Log(model)
+}
+func testWaittime(t *testing.T, id string) {
+
+	control := attractionController{}
+	result := struct {
+		Realtime   interface{}
+		Prediction interface{}
+	}{}
+	utils.CreaterTestForHTTP(t, "/test/:id", "/test/"+id, control.waittimes, &result)
 
 	// t.Log(model)
 }

@@ -16,6 +16,5 @@ func TestVisitorIndex(t *testing.T) {
 	if len(models) < 1 {
 		// t.Fatalf("NoData")
 		// travis-ci has no data
-		return
 	}
 }
