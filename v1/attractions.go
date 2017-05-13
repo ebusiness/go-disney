@@ -236,6 +236,9 @@ func (control attractionController) getRealtimeWaittimes(c *gin.Context, datetim
 						"waitTime": 1,
 						// "updateTime": 1,
 						"createTime": 1,
+						"available":  1,
+						// "operation_start": 1,
+						"operation_end": 1,
 					},
 				},
 				bson.M{

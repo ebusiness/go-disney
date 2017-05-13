@@ -14,6 +14,7 @@ func Now() time.Time {
 	return time.Now().In(jst)
 }
 
+// DatetimeOfDate -
 func DatetimeOfDate(datetime time.Time) time.Time {
 	return time.Date(datetime.Year(), datetime.Month(), datetime.Day(), 0, 0, 0, 0, jst)
 }
