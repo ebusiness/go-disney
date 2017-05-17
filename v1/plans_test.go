@@ -7,7 +7,7 @@ import (
 )
 
 // go test v1/plans*.go -v
-func TestPlans(t *testing.T){
+func TestPlans(t *testing.T) {
 
 	control := planController{}
 	models := []models.PlanTemplate{}

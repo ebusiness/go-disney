@@ -15,6 +15,7 @@ type Attraction struct {
 	Category      string       `json:"category" bson:"category"`
 	IsAvailable   bool         `json:"is_available" bson:"is_available"`
 	YoutubeURL    string       `json:"youtube_url,omitempty" bson:"youtube_url,omitempty"`
+	Limited       []string     `json:"limited,omitempty" bson:"limited,omitempty"`
 	SummaryTag    []summaryTag `json:"summary_tags,omitempty" bson:"summary_tags,omitempty"`
 	Maps          []string     `json:"maps,omitempty" bson:"maps,omitempty"`
 	TagNames      []string     `json:"tags,omitempty" bson:"tags,omitempty"`

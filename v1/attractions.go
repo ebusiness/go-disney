@@ -97,12 +97,12 @@ func (control attractionController) detail(c *gin.Context) {
 	utils.SafelyExecutorForGin(c,
 		func() {
 			basonMatchID := bson.M{"$match": bson.M{"str_id": control.id}} //bson.ObjectIdHex(control.id)}}
-			project := control.commonProject(c, bson.M{"tag_ids": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
+			project := control.commonProject(c, bson.M{"tag_ids": 1, "limited": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
 
 			pipeline = (utils.BsonCreator{}).
 				Append(basonMatchID, project).
 				LookupWithUnwind("areas", "area", "_id", "area", control.lang).
-				// LookupWithUnwind("places", "park", "_id", "park", control.lang).
+				GraphLookup("limiteds", "$limited", "limited", "_id", "limited", control.lang).
 				GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags", control.lang).
 				Append(control.lookupSummaryTags()...).
 				Pipeline
