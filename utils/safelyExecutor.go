@@ -19,6 +19,9 @@ func SafelyExecutorForGin(c *gin.Context, tasks ...func()) {
 		if c.IsAborted() {
 			return
 		}
+		if c.Writer.Written() {
+			return
+		}
 		task()
 	}
 }

@@ -7,21 +7,21 @@ import (
 
 // RealWaittime -
 type RealWaittime struct {
-	collectionName string `collectionName:"realtime"`
+	collectionName string     `collectionName:"realtime"`
+	WaitTime       float64    `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
+	CreateTime     time.Time  `json:"createTime" bson:"createTime"`
+	Available      bool       `json:"available" bson:"available"`
+	OperationEnd   *time.Time `json:"operation_end" bson:"operation_end"`
 	// ID             bson.ObjectId `json:"_id" bson:"_id"`
-	WaitTime string `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
 	// UpdateTime *time.Time `json:"updateTime" bson:"updateTime"`
-	CreateTime time.Time `json:"createTime" bson:"createTime"`
-	Available  bool      `json:"available" bson:"available"`
 	// OperationStart *time.Time `json:"operation_start" bson:"operation_start"`
-	OperationEnd *time.Time `json:"operation_end" bson:"operation_end"`
 }
 
 // PredictionWaittime -
 type PredictionWaittime struct {
-	collectionName string `collectionName:"waittimes"`
+	collectionName string    `collectionName:"waittimes"`
+	WaitTime       float64   `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
+	CreateTime     time.Time `json:"createTime" bson:"createTime"`
 	// ID             bson.ObjectId `json:"_id" bson:"_id"`
-	WaitTime string `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
 	// UpdateTime *time.Time `json:"updateTime" bson:"updateTime"`
-	CreateTime time.Time `json:"createTime" bson:"createTime"`
 }

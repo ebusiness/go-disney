@@ -174,7 +174,7 @@ func (control attractionController) lookupSummaryTags() []bson.M {
 func (control attractionController) waittimesOfDate(c *gin.Context) {
 	dateString := c.Param("date")
 	if len(dateString) < 0 {
-		c.AbortWithStatus(http.StatusUnsupportedMediaType) //415
+		c.AbortWithStatus(http.StatusNotAcceptable) //415
 		return
 	}
 	t, _ := time.Parse("2006-01-02 -0700", dateString+" +0900")

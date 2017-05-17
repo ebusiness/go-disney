@@ -10,24 +10,23 @@ type Attraction struct {
 	collectionName string `collectionName:"attractions"`
 	// ID             bson.ObjectId `json:"_id" bson:"_id"`
 	// Park          Place        `json:"park" bson:"park"`
-	StrID         string       `json:"str_id" bson:"str_id"`
-	AreaName      string       `json:"area" bson:"area"`
+	StrID         string       `json:"str_id,omitempty" bson:"str_id,omitempty"`
+	AreaName      string       `json:"area,omitempty" bson:"area,omitempty"`
 	Category      string       `json:"category" bson:"category"`
 	IsAvailable   bool         `json:"is_available" bson:"is_available"`
-	ThumURL       string       `json:"thum_url_pc" bson:"thum_url_pc"`
 	YoutubeURL    string       `json:"youtube_url,omitempty" bson:"youtube_url,omitempty"`
 	SummaryTag    []summaryTag `json:"summary_tags,omitempty" bson:"summary_tags,omitempty"`
 	Maps          []string     `json:"maps,omitempty" bson:"maps,omitempty"`
 	TagNames      []string     `json:"tags,omitempty" bson:"tags,omitempty"`
 	Images        []string     `json:"images" bson:"main_visual_urls"`
-	IsFastpass    bool         `json:"is_fastpass" bson:"is_fastpass"`
-	IsLottery     bool         `json:"is_lottery" bson:"is_lottery"`
-	IsMustBook    bool         `json:"is_must_book" bson:"is_must_book"`
+	IsLottery     bool         `json:"is_lottery,omitempty" bson:"is_lottery,omitempty"`
+	IsMustBook    bool         `json:"is_must_book,omitempty" bson:"is_must_book,omitempty"`
 	Name          string       `json:"name,omitempty" bson:"name,omitempty"`
 	Note          string       `json:"note,omitempty" bson:"note,omitempty"`
 	Introductions string       `json:"introductions,omitempty" bson:"introductions,omitempty"`
 	Summaries     []summary    `json:"summaries,omitempty" bson:"summaries,omitempty"`
 	Realtime      interface{}  `json:"realtime,omitempty" bson:"realtime,omitempty"`
+	// IsFastpass    bool         `json:"is_fastpass,omitempty" bson:"is_fastpass,omitempty"`
 }
 
 type summaryTag struct {
