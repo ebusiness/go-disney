@@ -7,7 +7,7 @@ import (
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
-	"log"
+	// "log"
 	"math"
 	"net/http"
 	"time"

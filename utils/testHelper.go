@@ -11,8 +11,8 @@ import (
 	"github.com/ebusiness/go-disney/middleware"
 )
 
-// CreaterTestForHTTP for httptest
-func CreaterTestForHTTP(t *testing.T, routeURL, requestURL string, handler gin.HandlerFunc, models interface{}) {
+// CreaterTestForHTTP for httptest, return statusCode
+func CreaterTestForHTTP(t *testing.T, routeURL, requestURL string, handler gin.HandlerFunc, models interface{}) int {
 	router := gin.New()
 	// mongo
 	router.Use(middleware.MongoSession)
@@ -23,17 +23,18 @@ func CreaterTestForHTTP(t *testing.T, routeURL, requestURL string, handler gin.H
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
 
-	// t.Log(resp.Body.String())
-	if resp.Code != http.StatusOK {
+	if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
 		t.Fatalf("Error: url (%v) status (%d)", requestURL, resp.Code)
 	}
 
 	if models == nil {
-		return
+		return resp.Code
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&models); err != nil {
 		t.Fatalf("Error: %v", err)
 	}
+	return resp.Code
+	// t.Log(resp.Body.String())
 	// t.Log(models)
 }
