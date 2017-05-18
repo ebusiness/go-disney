@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"github.com/ebusiness/go-disney/middleware"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 var (
@@ -19,5 +19,19 @@ func init() {
 	// version 1
 	V1 = Route.Group("/v1/:lang/:park")
 
-	// V1.Use(middleware.SessionRedisStore())
+	app := appBase{}
+	Route.GET("/", app.index)
+	Route.GET("/versions", app.versions)
+}
+
+type appBase struct{}
+
+func (app appBase) index(c *gin.Context) {
+	c.JSON(http.StatusOK, "disney navigation version 1.0.0")
+}
+
+func (app appBase) versions(c *gin.Context) {
+	c.JSON(http.StatusOK, map[string]bool{
+		"V1": V1 != nil,
+	})
 }
