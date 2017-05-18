@@ -6,8 +6,9 @@ import (
 	"github.com/ebusiness/go-disney/v1/algorithms"
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	// "log"
+	"log"
 	"math"
 	"net/http"
 	"time"
@@ -105,8 +106,10 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 			if datetime.Minute() > prediction.CreateTime.Minute() {
 				continue
 			}
-			cost += prediction.WaitTime
-			model.Route[index].WaitTime = prediction.WaitTime
+			if prediction.WaitTime != nil {
+				cost += *prediction.WaitTime
+				model.Route[index].WaitTime = *prediction.WaitTime
+			}
 			// log.Println(item.StrID, "have to wait", datetime, prediction.CreateTime, prediction.WaitTime, item.TimeCost, item.WalktimeToNext, "=", cost)
 			break
 		}
@@ -132,7 +135,19 @@ func (control planController) cachePlan(mongo middleware.Mongo, template models.
 	model.TemplateID = model.PlanTemplate.ID
 	model.PlanTemplate.ID = bson.NewObjectId()
 	collection := mongo.GetCollection(model)
+	control.createIndex(collection)
 	collection.Insert(model)
+}
+
+func (control planController) createIndex(collection *mgo.Collection) {
+	index := mgo.Index{
+		Key: []string{"template_id", "start", "lang"},
+	}
+
+	err := collection.EnsureIndex(index)
+	if err != nil {
+		log.Println("EnsureIndex", err)
+	}
 }
 
 func (control planController) getConditionsForPlanList(conditions ...bson.M) []bson.M {

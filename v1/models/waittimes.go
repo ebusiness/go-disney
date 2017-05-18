@@ -8,7 +8,7 @@ import (
 // RealWaittime -
 type RealWaittime struct {
 	collectionName string     `collectionName:"realtime"`
-	WaitTime       float64    `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
+	WaitTime       *float64   `json:"waitTime" bson:"waitTime"`
 	CreateTime     time.Time  `json:"createTime" bson:"createTime"`
 	Available      bool       `json:"available" bson:"available"`
 	OperationEnd   *time.Time `json:"operation_end" bson:"operation_end"`
@@ -20,7 +20,7 @@ type RealWaittime struct {
 // PredictionWaittime -
 type PredictionWaittime struct {
 	collectionName string    `collectionName:"waittimes"`
-	WaitTime       float64   `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
+	WaitTime       *float64  `json:"waitTime" bson:"waitTime"`
 	CreateTime     time.Time `json:"createTime" bson:"createTime"`
 	// ID             bson.ObjectId `json:"_id" bson:"_id"`
 	// UpdateTime *time.Time `json:"updateTime" bson:"updateTime"`

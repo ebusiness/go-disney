@@ -198,9 +198,11 @@ func (control attractionController) calculateWaittimes(c *gin.Context, datetime 
 	}
 
 	result := struct {
+		Datetime   time.Time   `json:"datetime"`
 		Realtime   interface{} `json:"realtime,omitempty"`
 		Prediction interface{} `json:"prediction,omitempty"`
 	}{
+		datetime,
 		control.getRealtimeWaittimes(c, datetime),
 		prediction,
 	}

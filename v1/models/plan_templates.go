@@ -20,6 +20,6 @@ type planRoute struct {
 	TimeCost       float64    `json:"timeCost" bson:"timeCost"`
 	DistanceToNext float64    `json:"distanceToNext" bson:"distanceToNext"`
 	WalktimeToNext float64    `json:"walktimeToNext"`
-	WaitTime       float64    `json:"waitTime,omitempty" bson:"waitTime,omitempty"`
+	WaitTime       float64    `json:"waitTime" bson:"waitTime"`
 	Attraction     Attraction `json:"attraction" bson:"attraction"`
 }
