@@ -9,8 +9,10 @@ import (
 var (
 	//Route - The engine of gin
 	Route = gin.Default()
-	//V1 - Route version 1
-	V1 *gin.RouterGroup //= Route.Group("/v1")
+	// version 1 group
+	V1 *gin.RouterGroup
+	// version 2 group
+	V2 *gin.RouterGroup
 )
 
 func init() {
@@ -18,6 +20,8 @@ func init() {
 	Route.Use(middleware.SessionRedisStore, middleware.MongoSession, middleware.CloseNotify)
 	// version 1
 	V1 = Route.Group("/v1/:lang/:park")
+	// version 2
+	// V2 = Route.Group("/v2/:lang/:park")
 
 	app := appBase{}
 	Route.GET("/", app.index)
@@ -31,7 +35,19 @@ func (app appBase) index(c *gin.Context) {
 }
 
 func (app appBase) versions(c *gin.Context) {
-	c.JSON(http.StatusOK, map[string]bool{
-		"V1": V1 != nil,
-	})
+	type status struct {
+		Version   string `json:"version"`
+		Available bool   `json:"available"`
+	}
+	value := []status{
+		status{
+			"v1",
+			V1 != nil,
+		},
+		status{
+			"v2",
+			V2 != nil,
+		},
+	}
+	c.JSON(http.StatusOK, value)
 }
