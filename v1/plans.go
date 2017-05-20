@@ -18,6 +18,7 @@ func init() {
 	control := planController{}
 	utils.V1.GET("/plans", control.list)
 	utils.V1.GET("/plans/:id/:datetime", control.detail)
+	utils.V1.POST("/plans/customize", control.customize)
 }
 
 type planController struct {
@@ -170,7 +171,7 @@ func (control planController) getConditionsForPlanList(conditions ...bson.M) []b
 				"main_visual_urls": "$temp.main_visual_urls",
 				"category":         "$temp.category",
 				"is_available":     "$temp.is_available",
-				"waittimes":        "$waittimes",
+				// "waittimes":        "$waittimes",
 			},
 		}}).
 		Append(bson.M{"$addFields": bson.M{"route.attraction": "$attraction"}}).
@@ -178,4 +179,90 @@ func (control planController) getConditionsForPlanList(conditions ...bson.M) []b
 		Append(bson.M{"$addFields": bson.M{"old.route": "$route"}}).
 		Append(bson.M{"$replaceRoot": bson.M{"newRoot": "$old"}}).
 		Pipeline
+}
+
+func (control planController) customize(c *gin.Context) {
+	control.initialization(c)
+	model := models.PlanTemplate{}
+	err := c.BindJSON(&model)
+	if err != nil {
+		log.Println("customize", err)
+		c.AbortWithStatus(http.StatusNotAcceptable)
+		return
+	}
+
+	mongo := middleware.GetMongo(c)
+
+	length := len(model.Route) - 1
+	ids := []string{}
+	for routeIndex := range model.Route {
+		id := model.Route[routeIndex].StrID
+		ids = append(ids, id)
+		nextID := ""
+		if routeIndex < length {
+			nextID = model.Route[routeIndex+1].StrID
+		}
+		model.Route[routeIndex].TimeCost = control.getTimeCost(mongo, id)
+		distanceToNext := control.getDistanceToNext(mongo, id, nextID)
+		model.Route[routeIndex].DistanceToNext = distanceToNext
+		model.Route[routeIndex].WalktimeToNext = math.Ceil(distanceToNext / control.speed(c))
+	}
+	model = control.algonrithmsWaittime(c, model, model.Start)
+
+	attractions := []models.Attraction{}
+	pipeline := (utils.BsonCreator{}).
+		Append(bson.M{"$match": bson.M{"str_id": bson.M{"$in": ids}}}).
+		Append(bson.M{"$project": bson.M{
+			"str_id":           1,
+			"name":             "$name." + control.lang,
+			"main_visual_urls": 1,
+			"category":         1,
+			"is_available":     1,
+		}}).
+		Pipeline
+	mongo.GetCollection(attractions).Pipe(pipeline).All(&attractions)
+	for routeIndex := range model.Route {
+		id := model.Route[routeIndex].StrID
+		for _, item := range attractions {
+			if id == item.StrID {
+				model.Route[routeIndex].Attraction = item
+				break
+			}
+		}
+	}
+
+	control.saveCustomizePlan(mongo, model)
+	c.JSON(http.StatusOK, model)
+}
+
+func (control planController) getTimeCost(mongo middleware.Mongo, id string) float64 {
+	model := models.TimeCost{}
+	collection := mongo.GetCollection(model)
+	collection.Find(bson.M{"str_id": id}).One(&model)
+	if model.Cost == nil {
+		return 0
+	}
+	return *model.Cost
+}
+
+func (control planController) getDistanceToNext(mongo middleware.Mongo, id, next string) float64 {
+	if len(next) == 0 {
+		return 0
+	}
+	model := models.AttractionRelations{}
+	collection := mongo.GetCollection(model)
+	collection.Find(bson.M{"from": id, "to": next}).One(&model)
+	if model.Distance == nil {
+		return 0
+	}
+	return *model.Distance
+}
+
+func (control planController) saveCustomizePlan(mongo middleware.Mongo, template models.PlanTemplate) {
+	model := models.PlanCustomize{PlanTemplate: template, Lang: control.lang}
+	model.PlanTemplate.ID = bson.NewObjectId()
+
+	collection := mongo.GetCollection(model)
+	err := collection.Insert(model)
+	log.Println("saveCustomizePlan", err)
 }

@@ -12,10 +12,11 @@ type PlanTemplate struct {
 	Name           string        `json:"name" bson:"name"`
 	Introduction   string        `json:"introduction" bson:"introduction"`
 	Start          time.Time     `json:"start,omitempty" bson:"start,omitempty"`
-	Route          []planRoute   `json:"route" bson:"route"`
+	Route          []PlanRoute   `json:"route" bson:"route"`
 }
 
-type planRoute struct {
+// PlanRoute -
+type PlanRoute struct {
 	StrID          string     `json:"str_id" bson:"str_id"`
 	TimeCost       float64    `json:"timeCost" bson:"timeCost"`
 	DistanceToNext float64    `json:"distanceToNext" bson:"distanceToNext"`

@@ -9,9 +9,9 @@ import (
 var (
 	//Route - The engine of gin
 	Route = gin.Default()
-	// version 1 group
+	// V1 version 1 group
 	V1 *gin.RouterGroup
-	// version 2 group
+	// V2 version 2 group
 	V2 *gin.RouterGroup
 )
 
