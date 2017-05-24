@@ -17,6 +17,7 @@ import (
 func init() {
 	control := planController{}
 	utils.V1.GET("/plans", control.list)
+	utils.V1.GET("/plan/random", control.random)
 	utils.V1.GET("/plans/:id/:datetime", control.detail)
 	utils.V1.POST("/plans/customize", control.customize)
 }
@@ -45,6 +46,26 @@ func (control planController) list(c *gin.Context) {
 		},
 		func() {
 			c.JSON(http.StatusOK, models)
+		})
+}
+
+func (control planController) random(c *gin.Context) {
+	control.initialization(c)
+	model := models.PlanTemplate{}
+	mongo := middleware.GetMongo(c)
+	collection := mongo.GetCollection(model)
+	var pipeline []bson.M
+	// result := []bson.M{}
+	utils.SafelyExecutorForGin(c,
+		func() {
+			pipeline = control.getConditionsForPlanList()
+			pipeline = append(pipeline, bson.M{"$sample": bson.M{"size": 1}})
+		},
+		func() {
+			collection.Pipe(pipeline).One(&model)
+		},
+		func() {
+			c.JSON(http.StatusOK, model)
 		})
 }
 
