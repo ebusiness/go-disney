@@ -68,6 +68,15 @@ func (control attractionController) search(c *gin.Context, conditions ...bson.M)
 				// LookupWithUnwind("places", "park", "_id", "park", lang).
 				// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
 				Pipeline
+
+			sortQuery := c.Query("sort")
+			if sortQuery == "hot" {
+				pipeline = (utils.BsonCreator{}).
+					Append(pipeline...).
+					LookupWithUnwind("attractions_hot", "str_id", "str_id", "hot", "").
+					Append(bson.M{"$sort": bson.M{"hot.hot": -1}}).
+					Pipeline
+			}
 		},
 		func() {
 			collection.Pipe(pipeline).All(&models)
