@@ -29,7 +29,7 @@ func (control attractionController) tags(c *gin.Context) {
 	utils.SafelyExecutorForGin(c,
 		func() {
 			pipeline = (utils.BsonCreator{}).
-				Append(bson.M{"$project": bson.M{"_id": 1, "icon": 1, "color": 1, "name": "$name." + control.lang}}).
+				Append(bson.M{"$project": bson.M{"_id": 1, "plan_creation": 1, "name": "$name." + control.lang}}).
 				Pipeline
 		},
 		func() {
@@ -46,21 +46,54 @@ func (control attractionController) attractionsOfTag(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	models := []models.AttractionTag{}
+	model := models.AttractionTag{}
 	mongo := middleware.GetMongo(c)
-	collection := mongo.GetCollection(models)
+	collection := mongo.GetCollection(model)
 	var pipeline []bson.M
+
+	conditions := append([]bson.M{},
+		bson.M{"$match": bson.M{"park_kind": control.park, "name." + control.lang: bson.M{"$ne": ""}}},
+		control.commonProject(c, bson.M{"tempid": 1}))
 
 	utils.SafelyExecutorForGin(c,
 		func() {
 			pipeline = (utils.BsonCreator{}).
-				Append(bson.M{"$project": bson.M{"_id": 1, "icon": 1, "color": 1, "name": "$name." + control.lang}}).
+				Append(bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(control.id)}}).
+				Append(bson.M{"$unwind": "$attractions"}).
+				Append(bson.M{
+					"$project": bson.M{
+						"str_id": "$attractions.str_id",
+						"rank":   bson.M{"$cmp": []string{"$attractions.ranking", "$plan_creation.threshold"}},
+					},
+				}).
+				Append(bson.M{"$match": bson.M{"rank": bson.M{"$gt": 0}}}).
+				LookupWithUnwind("attractions", "str_id", "str_id", "attraction", "").
+				Append(bson.M{"$addFields": bson.M{"attraction.tempid": "$_id"}}).
+				Append(bson.M{"$replaceRoot": bson.M{"newRoot": "$attraction"}}).
+				Append(conditions...).
+				LookupWithUnwind("areas", "area", "_id", "area", control.lang).
+				Append(bson.M{
+					"$project": bson.M{
+						"_id":        "$tempid",
+						"attraction": "$$ROOT",
+					},
+				}).
+				Append(bson.M{
+					"$group": bson.M{
+						"_id":         "$_id",
+						"attractions": bson.M{"$push": "$attraction"},
+					},
+				}).
 				Pipeline
 		},
 		func() {
-			collection.Pipe(pipeline).All(&models)
+			collection.Pipe(pipeline).One(&model)
 		},
 		func() {
-			c.JSON(http.StatusOK, models)
+			if len(model.Attractions) == 0 {
+				c.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+			c.JSON(http.StatusOK, model)
 		})
 }
