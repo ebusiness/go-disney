@@ -8,7 +8,9 @@ services:
   - redis-server
   - mongodb
 
-# before_install:
+before_install:
+  - go get -u github.com/golang/dep/...
+  - dep ensure
 # - docker run -d --name redis -p 6379:6379 redis:alpine
 # - docker run -d --name mongo -p 27017:27017 mvertes/alpine-mongo
 
