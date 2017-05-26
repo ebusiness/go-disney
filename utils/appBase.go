@@ -80,11 +80,11 @@ func (app appBase) versions(c *gin.Context) {
 		Available bool   `json:"available"`
 	}
 	value := []status{
-		status{
+		{
 			"v1",
 			V1 != nil,
 		},
-		status{
+		{
 			"v2",
 			V2 != nil,
 		},

@@ -65,7 +65,7 @@ func (control attractionController) calculateWaittimes(c *gin.Context, datetime 
 func (control attractionController) getPipelineOfRealtimeWaittimes(datetime time.Time) []bson.M {
 	nextDay := datetime.AddDate(0, 0, 1)
 	return []bson.M{
-		bson.M{
+		{
 			"$match": bson.M{
 				"str_id": control.id,
 				"createTime": bson.M{
@@ -74,7 +74,7 @@ func (control attractionController) getPipelineOfRealtimeWaittimes(datetime time
 				},
 			},
 		},
-		bson.M{
+		{
 			"$project": bson.M{
 				// "str_id":     1,
 				"waitTime": 1,
@@ -85,7 +85,7 @@ func (control attractionController) getPipelineOfRealtimeWaittimes(datetime time
 				"operation_end": 1,
 			},
 		},
-		bson.M{
+		{
 			"$sort": bson.M{"createTime": 1},
 		},
 	}

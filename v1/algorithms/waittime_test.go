@@ -1,9 +1,9 @@
 package algorithms
 
 import (
-  "github.com/ebusiness/go-disney/utils"
-  "time"
-  "testing"
+	"github.com/ebusiness/go-disney/utils"
+	"testing"
+	"time"
 )
 
 func TestWaittimes(t *testing.T) {
@@ -15,12 +15,12 @@ func TestWaittimes(t *testing.T) {
 		waittime := CalculateWaitTime("", start)
 		// item := []string{start.String(), waittime.String()}
 		// reslut = append(reslut, item)
-    // t.Log(start.String(), waittime.String())
-    if start.Weekday() == time.Sunday || start.Weekday() == time.Saturday || utils.IsHoliday(start) {
-      if waittime.waitTimeRank == Normal {
-        t.Fatal("the day["+start.String()+"] should not be [Normal]")
-      }
-    }
+		// t.Log(start.String(), waittime.String())
+		if start.Weekday() == time.Sunday || start.Weekday() == time.Saturday || utils.IsHoliday(start) {
+			if waittime.waitTimeRank == Normal {
+				t.Fatal("the day[" + start.String() + "] should not be [Normal]")
+			}
+		}
 		start = start.AddDate(0, 0, 1)
 	}
 }

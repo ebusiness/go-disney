@@ -71,28 +71,10 @@ func main() {
 		log.Fatalf("Missing required --host parameter")
 	}
 
-	var priv interface{}
-	var err error
-	switch *ecdsaCurve {
-	case "":
-		priv, err = rsa.GenerateKey(rand.Reader, *rsaBits)
-	case "P224":
-		priv, err = ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
-	case "P256":
-		priv, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	case "P384":
-		priv, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-	case "P521":
-		priv, err = ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-	default:
-		fmt.Fprintf(os.Stderr, "Unrecognized elliptic curve: %q", *ecdsaCurve)
-		os.Exit(1)
-	}
-	if err != nil {
-		log.Fatalf("failed to generate private key: %s", err)
-	}
+	priv := getPriv()
 
 	var notBefore time.Time
+	var err error
 	if len(*validFrom) == 0 {
 		notBefore = time.Now()
 	} else {
@@ -159,4 +141,28 @@ func main() {
 	pem.Encode(keyOut, pemBlockForKey(priv))
 	keyOut.Close()
 	log.Print("written key.pem\n")
+}
+
+func getPriv() interface{} {
+	var priv interface{}
+	var err error
+	switch *ecdsaCurve {
+	case "":
+		priv, err = rsa.GenerateKey(rand.Reader, *rsaBits)
+	case "P224":
+		priv, err = ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
+	case "P256":
+		priv, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	case "P384":
+		priv, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	case "P521":
+		priv, err = ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	default:
+		fmt.Fprintf(os.Stderr, "Unrecognized elliptic curve: %q", *ecdsaCurve)
+		os.Exit(1)
+	}
+	if err != nil {
+		log.Fatalf("failed to generate private key: %s", err)
+	}
+	return priv
 }
