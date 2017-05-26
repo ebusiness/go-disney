@@ -27,7 +27,7 @@ func CreaterTestForHTTP(t *testing.T, routeURL, requestURL string, handler gin.H
 		t.Fatalf("Error: url (%v) status (%d)", requestURL, resp.Code)
 	}
 
-	if models == nil {
+	if resp.Code == http.StatusNotFound || models == nil {
 		return resp.Code
 	}
 
