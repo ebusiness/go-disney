@@ -6,7 +6,6 @@ import (
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
-	"net/http"
 )
 
 func init() {
@@ -20,22 +19,18 @@ type visitorController struct {
 
 func (control visitorController) tags(c *gin.Context) {
 	control.initialization(c)
-	models := []models.VisitorTag{}
-	mongo := middleware.GetMongo(c)
-	collection := mongo.GetCollection(models)
-
-	var pipeline []bson.M
-
-	utils.SafelyExecutorForGin(c,
-		func() {
-			pipeline = (utils.BsonCreator{}).
-				Append(bson.M{"$addFields": bson.M{"name": "$" + control.lang}}).
-				Pipeline
-		},
-		func() {
-			collection.Pipe(pipeline).All(&models)
-		},
-		func() {
-			c.JSON(http.StatusOK, models)
-		})
+	getPipeline := func(param interface{}) (interface{}, error) {
+		return (utils.BsonCreator{}).
+			Append(bson.M{"$addFields": bson.M{"name": "$" + control.lang}}).
+			Pipeline, nil
+	}
+	exec := func(param interface{}) (interface{}, error) {
+		pipeline := param.([]bson.M)
+		models := []models.VisitorTag{}
+		mongo := middleware.GetMongo(c)
+		collection := mongo.GetCollection(models)
+		err := collection.Pipe(pipeline).All(&models)
+		return models, err
+	}
+	utils.Executor(c).Waterfall(getPipeline, exec)
 }

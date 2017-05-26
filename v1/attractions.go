@@ -6,6 +6,7 @@ import (
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 	"net/http"
 )
 
@@ -47,43 +48,39 @@ func (control attractionController) commonProject(c *gin.Context, custom bson.M)
 }
 
 func (control attractionController) list(c *gin.Context) {
+	///////////////////////
+	async := utils.Executor(c)
+	log.Println(async)
+	///////////////////////
 	control.initialization(c)
-	conditions := append([]bson.M{},
-		bson.M{"$match": bson.M{"park_kind": control.park, "name." + control.lang: bson.M{"$ne": ""}}},
-		control.commonProject(c, nil))
-	control.search(c, conditions...)
-}
+	getPipeline := func(param interface{}) (interface{}, error) {
+		pipeline := (utils.BsonCreator{}).
+			Append(bson.M{"$match": bson.M{"park_kind": control.park, "name." + control.lang: bson.M{"$ne": ""}}}).
+			Append(control.commonProject(c, nil)).
+			LookupWithUnwind("areas", "area", "_id", "area", control.lang).
+			// LookupWithUnwind("places", "park", "_id", "park", lang).
+			// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
+			Pipeline
 
-func (control attractionController) search(c *gin.Context, conditions ...bson.M) {
-	models := []models.Attraction{}
-	mongo := middleware.GetMongo(c)
-	collection := mongo.GetCollection(models)
-	var pipeline []bson.M
-
-	utils.SafelyExecutorForGin(c,
-		func() {
+		sortQuery := c.Query("sort")
+		if sortQuery == "hot" {
 			pipeline = (utils.BsonCreator{}).
-				Append(conditions...).
-				LookupWithUnwind("areas", "area", "_id", "area", control.lang).
-				// LookupWithUnwind("places", "park", "_id", "park", lang).
-				// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
+				Append(pipeline...).
+				LookupWithUnwind("attractions_hot", "str_id", "str_id", "hot", "").
+				Append(bson.M{"$sort": bson.M{"hot.hot": -1}}).
 				Pipeline
-
-			sortQuery := c.Query("sort")
-			if sortQuery == "hot" {
-				pipeline = (utils.BsonCreator{}).
-					Append(pipeline...).
-					LookupWithUnwind("attractions_hot", "str_id", "str_id", "hot", "").
-					Append(bson.M{"$sort": bson.M{"hot.hot": -1}}).
-					Pipeline
-			}
-		},
-		func() {
-			collection.Pipe(pipeline).All(&models)
-		},
-		func() {
-			c.JSON(http.StatusOK, models)
-		})
+		}
+		return pipeline, nil
+	}
+	exec := func(param interface{}) (interface{}, error) {
+		pipeline := param.([]bson.M)
+		models := []models.Attraction{}
+		mongo := middleware.GetMongo(c)
+		collection := mongo.GetCollection(models)
+		err := collection.Pipe(pipeline).All(&models)
+		return models, err
+	}
+	utils.Executor(c).Waterfall(getPipeline, exec)
 }
 
 func (control attractionController) detail(c *gin.Context) {
@@ -93,31 +90,27 @@ func (control attractionController) detail(c *gin.Context) {
 		return
 	}
 
-	model := models.Attraction{}
-	mongo := middleware.GetMongo(c)
-	collection := mongo.GetCollection(model)
-	var pipeline []bson.M
+	getPipeline := func(param interface{}) (interface{}, error) {
+		basonMatchID := bson.M{"$match": bson.M{"str_id": control.id}} //bson.ObjectIdHex(control.id)}}
+		project := control.commonProject(c, bson.M{"tag_ids": 1, "limited": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
 
-	utils.SafelyExecutorForGin(c,
-		func() {
-			basonMatchID := bson.M{"$match": bson.M{"str_id": control.id}} //bson.ObjectIdHex(control.id)}}
-			project := control.commonProject(c, bson.M{"tag_ids": 1, "limited": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
-
-			pipeline = (utils.BsonCreator{}).
-				Append(basonMatchID, project).
-				LookupWithUnwind("areas", "area", "_id", "area", control.lang).
-				GraphLookup("limiteds", "$limited", "limited", "_id", "limited", control.lang).
-				GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags", control.lang).
-				Append(control.lookupSummaryTags()...).
-				Pipeline
-
-		},
-		func() {
-			collection.Pipe(pipeline).One(&model)
-		},
-		func() {
-			c.JSON(http.StatusOK, model)
-		})
+		return (utils.BsonCreator{}).
+			Append(basonMatchID, project).
+			LookupWithUnwind("areas", "area", "_id", "area", control.lang).
+			GraphLookup("limiteds", "$limited", "limited", "_id", "limited", control.lang).
+			GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags", control.lang).
+			Append(control.lookupSummaryTags()...).
+			Pipeline, nil
+	}
+	exec := func(param interface{}) (interface{}, error) {
+		pipeline := param.([]bson.M)
+		model := models.Attraction{}
+		mongo := middleware.GetMongo(c)
+		collection := mongo.GetCollection(model)
+		err := collection.Pipe(pipeline).One(&model)
+		return model, err
+	}
+	utils.Executor(c).Waterfall(getPipeline, exec)
 }
 
 func (control attractionController) lookupSummaryTags() []bson.M {

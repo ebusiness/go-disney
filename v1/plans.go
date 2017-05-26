@@ -32,41 +32,37 @@ func (control planController) speed(c *gin.Context) float64 {
 
 func (control planController) list(c *gin.Context) {
 	control.initialization(c)
-	models := []models.PlanTemplate{}
-	mongo := middleware.GetMongo(c)
-	collection := mongo.GetCollection(models)
-	var pipeline []bson.M
-	// result := []bson.M{}
-	utils.SafelyExecutorForGin(c,
-		func() {
-			pipeline = control.getConditionsForPlanList()
-		},
-		func() {
-			collection.Pipe(pipeline).All(&models)
-		},
-		func() {
-			c.JSON(http.StatusOK, models)
-		})
+
+	getPipeline := func(param interface{}) (interface{}, error) {
+		return control.getConditionsForPlanList(), nil
+	}
+	exec := func(param interface{}) (interface{}, error) {
+		pipeline := param.([]bson.M)
+		models := []models.PlanTemplate{}
+		mongo := middleware.GetMongo(c)
+		collection := mongo.GetCollection(models)
+		err := collection.Pipe(pipeline).All(&models)
+		return models, err
+	}
+	utils.Executor(c).Waterfall(getPipeline, exec)
 }
 
 func (control planController) random(c *gin.Context) {
 	control.initialization(c)
-	model := models.PlanTemplate{}
-	mongo := middleware.GetMongo(c)
-	collection := mongo.GetCollection(model)
-	var pipeline []bson.M
-	// result := []bson.M{}
-	utils.SafelyExecutorForGin(c,
-		func() {
-			pipeline = control.getConditionsForPlanList()
-			pipeline = append(pipeline, bson.M{"$sample": bson.M{"size": 1}})
-		},
-		func() {
-			collection.Pipe(pipeline).One(&model)
-		},
-		func() {
-			c.JSON(http.StatusOK, model)
-		})
+
+	getPipeline := func(param interface{}) (interface{}, error) {
+		return append(control.getConditionsForPlanList(),
+			bson.M{"$sample": bson.M{"size": 1}}), nil
+	}
+	exec := func(param interface{}) (interface{}, error) {
+		pipeline := param.([]bson.M)
+		model := models.PlanTemplate{}
+		mongo := middleware.GetMongo(c)
+		collection := mongo.GetCollection(model)
+		err := collection.Pipe(pipeline).One(&model)
+		return model, err
+	}
+	utils.Executor(c).Waterfall(getPipeline, exec)
 }
 
 func (control planController) getDatetime(c *gin.Context) time.Time {
@@ -82,35 +78,43 @@ func (control planController) detail(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
+
 	datetime := control.getDatetime(c)
 	mongo := middleware.GetMongo(c)
-	model := models.PlanTemplate{}
-	var err error
 
-	utils.SafelyExecutorForGin(c,
-		func() {
-			model, err = control.getPlan(mongo, datetime)
-			if err == nil {
-				c.JSON(http.StatusOK, control.algonrithmsWaittime(c, model, datetime))
-			}
-		},
-		func() {
-			collection := mongo.GetCollection(model)
-			pipeline := control.getConditionsForPlanList(bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(control.id)}})
-			err = collection.Pipe(pipeline).One(&model)
-			if err != nil {
-				c.JSON(http.StatusNotFound, nil)
-			}
-		},
-		func() {
-			model.Start = datetime
+	getPlanFromCache := func(param interface{}) (interface{}, error) {
+		model, err := control.getPlan(mongo, datetime)
+		if err == nil {
+			return model, nil
+		}
+		return nil, nil
+	}
+	makePlan := func(param interface{}) (interface{}, error) {
+		if param != nil {
+			return param, nil
+		}
+		model := models.PlanTemplate{}
+		collection := mongo.GetCollection(model)
+		pipeline := control.getConditionsForPlanList(bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(control.id)}})
+		err := collection.Pipe(pipeline).One(&model)
+		if err != nil {
+			c.JSON(http.StatusNotFound, nil)
+		}
+		return model, err
+	}
+	exec := func(param interface{}) (interface{}, error) {
+		model := param.(models.PlanTemplate)
+		if model.Start == nil {
+			model.Start = &datetime
 			for routeIndex := range model.Route {
 				model.Route[routeIndex].WalktimeToNext = math.Ceil(model.Route[routeIndex].DistanceToNext / control.speed(c))
 			}
 			control.cachePlan(mongo, model)
-			model = control.algonrithmsWaittime(c, model, datetime)
-			c.JSON(http.StatusOK, model)
-		})
+		}
+		model = control.algonrithmsWaittime(c, model, datetime)
+		return model, nil
+	}
+	utils.Executor(c).Waterfall(getPlanFromCache, makePlan, exec)
 }
 
 func (control planController) algonrithmsWaittime(c *gin.Context, model models.PlanTemplate, datetime time.Time) models.PlanTemplate {
@@ -228,7 +232,7 @@ func (control planController) customize(c *gin.Context) {
 		model.Route[routeIndex].DistanceToNext = distanceToNext
 		model.Route[routeIndex].WalktimeToNext = math.Ceil(distanceToNext / control.speed(c))
 	}
-	model = control.algonrithmsWaittime(c, model, model.Start)
+	model = control.algonrithmsWaittime(c, model, *model.Start)
 
 	attractions := []models.Attraction{}
 	pipeline := (utils.BsonCreator{}).

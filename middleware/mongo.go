@@ -22,17 +22,7 @@ var databaseName = func() string {
 
 }()
 
-var session = func() *mgo.Session {
-	mongoSession, err := mgo.Dial(getConnectionString())
-
-	if err != nil {
-		log.Fatalln("cannot connect to the mongo server", err)
-	}
-	mongoSession.SetMode(mgo.Monotonic, true)
-	return mongoSession
-}()
-
-func getConnectionString() string {
+var connString = func() string {
 	server := os.Getenv("MONGOSERVER")
 	if len(server) < 1 {
 		server = config.MongoDefaultServer
@@ -43,6 +33,21 @@ func getConnectionString() string {
 	}
 
 	return "mongodb://" + server + ":" + port + "/" + databaseName
+}()
+
+var session = func() *mgo.Session {
+	mongoSession, err := mgo.Dial(connString)
+
+	if err != nil {
+		log.Fatalln("cannot connect to the mongo server", err)
+	}
+	mongoSession.SetMode(mgo.Monotonic, true)
+	return mongoSession
+}()
+
+// DisConnect disconnect from mongodb server
+func DisConnect() {
+	session.Close()
 }
 
 //MongoSession - MongoDB Session Storage for Connect Middleware

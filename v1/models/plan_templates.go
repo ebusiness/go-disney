@@ -11,7 +11,7 @@ type PlanTemplate struct {
 	ID             bson.ObjectId `json:"_id" bson:"_id"`
 	Name           string        `json:"name" bson:"name"`
 	Introduction   string        `json:"introduction" bson:"introduction"`
-	Start          time.Time     `json:"start,omitempty" bson:"start,omitempty"`
+	Start          *time.Time    `json:"start,omitempty" bson:"start,omitempty"`
 	Route          []PlanRoute   `json:"route" bson:"route"`
 }
 

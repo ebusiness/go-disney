@@ -7,7 +7,6 @@ import (
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
-	"log"
 	"net/http"
 	"time"
 )
@@ -38,65 +37,56 @@ func (control attractionController) calculateWaittimes(c *gin.Context, datetime 
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	var prediction interface{}
-	if datetime.After(utils.Now().AddDate(0, 0, -1)) {
-		waittime := algorithms.CalculateWaitTime(control.id, datetime)
-		prediction = waittime.List(c)
-	}
-
-	result := struct {
-		Datetime   time.Time   `json:"datetime"`
-		Realtime   interface{} `json:"realtime,omitempty"`
-		Prediction interface{} `json:"prediction,omitempty"`
-	}{
-		datetime,
-		control.getRealtimeWaittimes(c, datetime),
-		prediction,
-	}
-	c.JSON(http.StatusOK, result)
+	utils.Executor(c).Parallel(utils.ParallelCallback{
+		"datetime": func() (interface{}, error) {
+			return datetime, nil
+		},
+		"prediction": func() (interface{}, error) {
+			var prediction interface{}
+			if datetime.After(utils.Now().AddDate(0, 0, -1)) {
+				waittime := algorithms.CalculateWaitTime(control.id, datetime)
+				prediction = waittime.List(c)
+			}
+			return prediction, nil
+		},
+		"realtime": func() (interface{}, error) {
+			if datetime.After(utils.Now()) {
+				return nil, nil
+			}
+			models := []models.RealWaittime{}
+			mongo := middleware.GetMongo(c)
+			collection := mongo.GetCollection(models)
+			err := collection.Pipe(control.getPipelineOfRealtimeWaittimes(datetime)).All(&models)
+			return models, err
+		},
+	})
 }
 
-func (control attractionController) getRealtimeWaittimes(c *gin.Context, datetime time.Time) []models.RealWaittime {
-	if datetime.After(utils.Now()) {
-		log.Println("after")
-		return nil
-	}
-	models := []models.RealWaittime{}
-	mongo := middleware.GetMongo(c)
-	collection := mongo.GetCollection(models)
-	var pipeline []bson.M
-
-	utils.SafelyExecutorForGin(c,
-		func() {
-			nextDay := datetime.AddDate(0, 0, 1)
-			pipeline = []bson.M{
-				bson.M{
-					"$match": bson.M{
-						"str_id": control.id,
-						"createTime": bson.M{
-							"$gt": utils.DatetimeOfDate(datetime),
-							"$lt": utils.DatetimeOfDate(nextDay),
-						},
-					},
+func (control attractionController) getPipelineOfRealtimeWaittimes(datetime time.Time) []bson.M {
+	nextDay := datetime.AddDate(0, 0, 1)
+	return []bson.M{
+		bson.M{
+			"$match": bson.M{
+				"str_id": control.id,
+				"createTime": bson.M{
+					"$gt": utils.DatetimeOfDate(datetime),
+					"$lt": utils.DatetimeOfDate(nextDay),
 				},
-				bson.M{
-					"$project": bson.M{
-						// "str_id":     1,
-						"waitTime": 1,
-						// "updateTime": 1,
-						"createTime": 1,
-						"available":  1,
-						// "operation_start": 1,
-						"operation_end": 1,
-					},
-				},
-				bson.M{
-					"$sort": bson.M{"createTime": 1},
-				},
-			}
+			},
 		},
-		func() {
-			collection.Pipe(pipeline).All(&models)
-		})
-	return models
+		bson.M{
+			"$project": bson.M{
+				// "str_id":     1,
+				"waitTime": 1,
+				// "updateTime": 1,
+				"createTime": 1,
+				"available":  1,
+				// "operation_start": 1,
+				"operation_end": 1,
+			},
+		},
+		bson.M{
+			"$sort": bson.M{"createTime": 1},
+		},
+	}
 }
