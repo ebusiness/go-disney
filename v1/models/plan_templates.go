@@ -23,4 +23,5 @@ type PlanRoute struct {
 	WalktimeToNext float64    `json:"walktimeToNext"`
 	WaitTime       float64    `json:"waitTime" bson:"waitTime"`
 	Attraction     Attraction `json:"attraction" bson:"attraction"`
+	Schedule       Schedule   `json:"schedule" bson:"schedule"`
 }

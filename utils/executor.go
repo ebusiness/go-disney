@@ -75,7 +75,6 @@ func (async Async) Waterfall(tasks ...func(param interface{}) (interface{}, erro
 
 // Parallel - execute function safely for gin
 func (async Async) Parallel(tasks ParallelCallback) {
-	defer async.abort()
 
 	type parallelResult struct {
 		name string
@@ -83,6 +82,11 @@ func (async Async) Parallel(tasks ParallelCallback) {
 	}
 
 	parallelChan := make(chan parallelResult, len(tasks))
+
+	defer func() {
+		close(parallelChan)
+		async.abort()
+	}()
 
 	for name := range tasks {
 		nameTemp := name
@@ -102,5 +106,6 @@ func (async Async) Parallel(tasks ParallelCallback) {
 		}
 		list[temp.name] = temp.res
 	}
+
 	async.output(list, nil)
 }
