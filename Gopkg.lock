@@ -1,4 +1,10 @@
-memo = "0a4f0334966cd76cf0d505197ce4b49bf3b8649f0a47f9e26d0171448a272848"
+memo = "b818f34e095be9543272b940d014d96ceadb63bc521a795339fb3a79ca9ae51c"
+
+[[projects]]
+  name = "github.com/ahmetb/go-linq"
+  packages = ["."]
+  revision = "7e71c124c1f903df09ca08678f145f68b45d125e"
+  version = "v3.0.0"
 
 [[projects]]
   name = "github.com/boj/redistore"

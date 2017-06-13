@@ -1,13 +1,14 @@
 package v1
 
 import (
+	"github.com/ahmetb/go-linq"
 	"github.com/ebusiness/go-disney/middleware"
 	"github.com/ebusiness/go-disney/utils"
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
-	"log"
-	"math"
+	// "log"
+	// "math"
 	"net/http"
 )
 
@@ -57,6 +58,7 @@ func (control planController) random(c *gin.Context) {
 	}
 	utils.Executor(c).Waterfall(getPipeline, exec)
 }
+
 func (control planController) detail(c *gin.Context) {
 	control.initialization(c)
 	if len(control.id) < 1 || !bson.IsObjectIdHex(control.id) {
@@ -68,10 +70,10 @@ func (control planController) detail(c *gin.Context) {
 	mongo := middleware.GetMongo(c)
 
 	getPlanFromCache := func(param interface{}) (interface{}, error) {
-		model, err := control.getPlan(mongo, datetime)
-		if err == nil {
-			return model, nil
-		}
+		// model, err := control.getPlan(mongo, datetime)
+		// if err == nil {
+		// 	return model, nil
+		// }
 		return nil, nil
 	}
 	makePlan := func(param interface{}) (interface{}, error) {
@@ -91,12 +93,9 @@ func (control planController) detail(c *gin.Context) {
 		model := param.(models.PlanTemplate)
 		if model.Start == nil {
 			model.Start = &datetime
-			for routeIndex := range model.Route {
-				model.Route[routeIndex].WalktimeToNext = math.Ceil(model.Route[routeIndex].DistanceToNext / control.speed())
-			}
+			model = control.algonrithmsWaittime(c, model, datetime)
+			control.cachePlan(mongo, model)
 		}
-		model = control.algonrithmsWaittime(c, model, datetime)
-		control.cachePlan(mongo, model)
 		return model, nil
 	}
 
@@ -108,28 +107,17 @@ func (control planController) customize(c *gin.Context) {
 	model := models.PlanTemplate{}
 	err := c.BindJSON(&model)
 	if err != nil {
-		log.Println("customize", err)
 		c.AbortWithStatus(http.StatusNotAcceptable)
 		return
 	}
 
 	mongo := middleware.GetMongo(c)
-
-	length := len(model.Route) - 1
 	ids := []string{}
-	for routeIndex := range model.Route {
-		id := model.Route[routeIndex].StrID
-		ids = append(ids, id)
-		nextID := ""
-		if routeIndex < length {
-			nextID = model.Route[routeIndex+1].StrID
-		}
-		model.Route[routeIndex].TimeCost = control.getTimeCost(mongo, id)
-		distanceToNext := control.getDistanceToNext(mongo, id, nextID)
-		model.Route[routeIndex].DistanceToNext = distanceToNext
-		model.Route[routeIndex].WalktimeToNext = math.Ceil(distanceToNext / control.speed())
-	}
-	model = control.algonrithmsWaittime(c, model, *model.Start)
+
+	linq.From(model.Route).ForEachIndexedT(func(index int, item models.PlanRoute) {
+		model.Route[index].TimeCost = control.getTimeCost(mongo, item.StrID)
+		ids = append(ids, item.StrID)
+	})
 
 	attractions := []models.Attraction{}
 	pipeline := (utils.BsonCreator{}).
@@ -143,6 +131,7 @@ func (control planController) customize(c *gin.Context) {
 		}}).
 		Pipeline
 	mongo.GetCollection(attractions).Pipe(pipeline).All(&attractions)
+
 	for routeIndex := range model.Route {
 		id := model.Route[routeIndex].StrID
 		for _, item := range attractions {
@@ -152,6 +141,7 @@ func (control planController) customize(c *gin.Context) {
 			}
 		}
 	}
+	model = control.algonrithmsWaittime(c, model, *model.Start)
 
 	control.saveCustomizePlan(mongo, model)
 	c.JSON(http.StatusOK, model)

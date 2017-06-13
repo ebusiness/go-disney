@@ -1,9 +1,11 @@
 package v1
 
 import (
+	"github.com/ahmetb/go-linq"
 	"github.com/ebusiness/go-disney/middleware"
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
+	"log"
 	"math"
 	"sort"
 	"time"
@@ -68,6 +70,7 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 	model.Route = resultRoute
 	return model
 }
+
 func (control planController) getItemWithsSchdule(mongo middleware.Mongo, nextID string, datetime time.Time, waittime float64, route models.PlanRoute) models.PlanRoute {
 	route.Schedule.StartTime = datetime
 
@@ -79,57 +82,53 @@ func (control planController) getItemWithsSchdule(mongo middleware.Mongo, nextID
 
 	return route
 }
+
 func (control planController) sortShow(c *gin.Context, model models.PlanTemplate, datetime time.Time) []models.PlanRoute {
 	showIds := []string{}
-	for _, item := range model.Route {
-		if item.Attraction.Category != "show" {
-			continue
-		}
-		showIds = append(showIds, item.StrID)
-	}
+	showRoutes := []models.PlanRoute{}
+	linq.From(model.Route).WhereT(func(item models.PlanRoute) bool {
+		return item.Attraction.Category == "show"
+	}).ToSlice(&showRoutes)
+
+	linq.From(showRoutes).SelectT(func(item models.PlanRoute) string {
+		return item.StrID
+	}).ToSlice(&showIds)
 
 	mongo := middleware.GetMongo(c)
 	schedules := control.getScheduleList(mongo, datetime, showIds)
 
 	routes := []models.PlanRoute{}
-
-	lists := []models.Schedule{}
-	for index, route := range model.Route {
-		if route.Attraction.Category != "show" {
-			continue
+	linq.From(schedules).ForEachT(func(item models.ScheduleDaily) {
+		route := control.getNotConflictShow(item, showRoutes, routes)
+		if route == nil {
+			return
 		}
+		routes = append(routes, *route)
+	})
 
-		for _, item := range schedules {
-			if item.StrID != model.Route[index].StrID {
-				continue
-			}
-			// model.Route[index].Schedule = item.Schedules[0]
-			for _, showTime := range item.Schedules {
-				// if route.TimeCost < showTime.EndTime.Sub(*showTime.StartTime).Minutes() {
-				// 	routes = append(routes, route)
-				// 	break
-				// }
-				conflict := false
-				for _, cacheTime := range lists {
-					if cacheTime.IsConflict(showTime) {
-						conflict = true
-						break
-					}
-				}
-				if !conflict {
-					route.Schedule = showTime
-					lists = append(lists, showTime)
-					routes = append(routes, route)
-					break
-				}
-			}
-		}
-	}
 	sort.Sort(sortPlanRoute(routes))
 	return routes
-
 }
 
-// func (control planController) needInsertShowRightNow(schedules []models.ScheduleDaily, thisRoute, nextRoute models.PlanRoute, datetime time.Time) bool {
-//
-// }
+func (control planController) getNotConflictShow(item models.ScheduleDaily, showRoutes []models.PlanRoute, routes []models.PlanRoute) *models.PlanRoute {
+	res := linq.From(item.Schedules).WhereT(func(showTime models.Schedule) bool {
+
+		return linq.From(routes).WhereT(func(route models.PlanRoute) bool {
+			return route.Schedule.IsConflict(showTime)
+		}).First() == nil
+
+	}).First()
+
+	if res == nil {
+		return nil
+	}
+	log.Println(res)
+
+	schedule := res.(models.Schedule)
+	route := linq.From(showRoutes).WhereT(func(showRoute models.PlanRoute) bool {
+		return showRoute.StrID == item.StrID
+	}).First().(models.PlanRoute)
+	route.Schedule = schedule
+
+	return &route
+}
