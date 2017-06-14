@@ -1,16 +1,16 @@
 
-[[dependencies]]
+[[constraint]]
   name = "github.com/gin-contrib/sessions"
   revision = "6cd33f5654c2f0135c828636c6cd6eb6c994d4af"
 
-[[dependencies]]
+[[constraint]]
   name = "github.com/gin-gonic/gin"
   version = "v1.1.4"
 
-[[dependencies]]
+[[constraint]]
   name = "gopkg.in/mgo.v2"
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
-[[dependencies]]
+[[constraint]]
   name = "github.com/ahmetb/go-linq"
   version = "v3.0.0"

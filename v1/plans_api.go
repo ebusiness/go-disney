@@ -70,10 +70,10 @@ func (control planController) detail(c *gin.Context) {
 	mongo := middleware.GetMongo(c)
 
 	getPlanFromCache := func(param interface{}) (interface{}, error) {
-		// model, err := control.getPlan(mongo, datetime)
-		// if err == nil {
-		// 	return model, nil
-		// }
+		model, err := control.getPlan(mongo, datetime)
+		if err == nil {
+			return model, nil
+		}
 		return nil, nil
 	}
 	makePlan := func(param interface{}) (interface{}, error) {

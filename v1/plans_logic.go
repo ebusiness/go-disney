@@ -16,7 +16,7 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 	mongo := middleware.GetMongo(c)
 
 	sortList := control.sortShow(c, model, datetime)
-	// log.Println("sortRoutes", sortRoutes)
+	// log.Println("sortRoutes", sortList)
 
 	tempRoutes := []models.PlanRoute{}
 	for _, item := range model.Route {
@@ -45,6 +45,7 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 		if routeIndex < length {
 			nextID = tempRoutes[routeIndex+1].StrID
 		}
+
 		insertItem := item
 		for sortIndex, sortItem := range sortRoutes {
 			waittime := control.getPredictionWaittime(c, item, datetime)
@@ -58,7 +59,7 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 			}
 		}
 		waittime := control.getPredictionWaittime(c, insertItem, datetime)
-		item = control.getItemWithsSchdule(mongo, nextID, datetime, waittime, insertItem)
+		item = control.getItemWithsSchdule(mongo, nextID, datetime, waittime, item)
 		datetime = item.Schedule.EndTime
 
 		resultRoute = append(resultRoute, item)
