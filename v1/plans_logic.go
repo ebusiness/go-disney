@@ -14,9 +14,8 @@ import (
 func (control planController) algonrithmsWaittime(c *gin.Context, model models.PlanTemplate, datetime time.Time) models.PlanTemplate {
 
 	mongo := middleware.GetMongo(c)
-
-	sortList := control.sortShow(c, model, datetime)
-	// log.Println("sortRoutes", sortList)
+	fpList := control.fpList(c, model, datetime)
+	sortList := control.sortShow(c, model, datetime, fpList)
 
 	tempRoutes := []models.PlanRoute{}
 	for _, item := range model.Route {
@@ -31,6 +30,7 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 			tempRoutes = append(tempRoutes, item)
 		}
 	}
+
 	sortRoutes := []models.PlanRoute{}
 	for _, sortItem := range sortList {
 		if sortItem.Schedule.StartTime.Before(datetime) {
@@ -46,19 +46,28 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 			nextID = tempRoutes[routeIndex+1].StrID
 		}
 
-		insertItem := item
 		for sortIndex, sortItem := range sortRoutes {
 			waittime := control.getPredictionWaittime(c, item, datetime)
 			tempItem := control.getItemWithsSchdule(mongo, sortItem.StrID, datetime, waittime, item)
 			if sortItem.Schedule.IsConflict(tempItem.Schedule) {
-				insertItem = sortItem
-				resultRoute = append(resultRoute, sortItem)
+
+				waittime := control.getPredictionWaittime(c, sortItem, datetime)
+
+				//　TODO　it's should be next show's StrID or `item.StrID`
+				// set it to `item.StrID` temporary
+				insertItem := control.getItemWithsSchdule(mongo, item.StrID, datetime, waittime, sortItem)
+
+				resultRoute = append(resultRoute, insertItem)
 				datetime = sortItem.Schedule.EndTime
-				sortRoutes = append(sortRoutes[:sortIndex], sortRoutes[sortIndex+1:]...)
+				if len(sortRoutes) == 1 {
+					sortRoutes = []models.PlanRoute{}
+				} else {
+					sortRoutes = append(sortRoutes[:sortIndex], sortRoutes[sortIndex+1:]...)
+				}
 				continue
 			}
 		}
-		waittime := control.getPredictionWaittime(c, insertItem, datetime)
+		waittime := control.getPredictionWaittime(c, item, datetime)
 		item = control.getItemWithsSchdule(mongo, nextID, datetime, waittime, item)
 		datetime = item.Schedule.EndTime
 
@@ -76,6 +85,9 @@ func (control planController) getItemWithsSchdule(mongo middleware.Mongo, nextID
 	route.Schedule.StartTime = datetime
 
 	route.WaitTime = waittime
+	if route.FastPass != nil {
+		route.WaitTime = waittime * control.fastRate()
+	}
 	route.DistanceToNext = control.getDistanceToNext(mongo, route.StrID, nextID)
 	route.WalktimeToNext = math.Ceil(route.DistanceToNext / control.speed())
 	cost := route.TimeCost + route.WalktimeToNext + waittime
@@ -84,7 +96,19 @@ func (control planController) getItemWithsSchdule(mongo middleware.Mongo, nextID
 	return route
 }
 
-func (control planController) sortShow(c *gin.Context, model models.PlanTemplate, datetime time.Time) []models.PlanRoute {
+func (control planController) fpList(c *gin.Context, model models.PlanTemplate, datetime time.Time) []models.PlanRoute {
+	routes := []models.PlanRoute{}
+	linq.From(model.Route).WhereT(func(item models.PlanRoute) bool {
+		return item.FastPass != nil
+	}).SelectT(func(item models.PlanRoute) models.PlanRoute {
+		item.Schedule.StartTime = *item.FastPass.Begin
+		item.Schedule.EndTime = *item.FastPass.End
+		return item
+	}).ToSlice(&routes)
+	return routes
+}
+
+func (control planController) sortShow(c *gin.Context, model models.PlanTemplate, datetime time.Time, routes []models.PlanRoute) []models.PlanRoute {
 	showIds := []string{}
 	showRoutes := []models.PlanRoute{}
 	linq.From(model.Route).WhereT(func(item models.PlanRoute) bool {
@@ -98,7 +122,6 @@ func (control planController) sortShow(c *gin.Context, model models.PlanTemplate
 	mongo := middleware.GetMongo(c)
 	schedules := control.getScheduleList(mongo, datetime, showIds)
 
-	routes := []models.PlanRoute{}
 	linq.From(schedules).ForEachT(func(item models.ScheduleDaily) {
 		route := control.getNotConflictShow(item, showRoutes, routes)
 		if route == nil {

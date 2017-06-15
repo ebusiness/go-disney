@@ -24,4 +24,10 @@ type PlanRoute struct {
 	WaitTime       float64    `json:"waitTime" bson:"waitTime"`
 	Attraction     Attraction `json:"attraction" bson:"attraction"`
 	Schedule       Schedule   `json:"schedule" bson:"schedule"`
+	FastPass       *fastPass  `json:"fastpass,omitempty" bson:"fastpass,omitempty"`
+}
+
+type fastPass struct {
+	Begin *time.Time `json:"begin,omitempty" bson:"begin,omitempty"`
+	End   *time.Time `json:"end,omitempty" bson:"end,omitempty"`
 }

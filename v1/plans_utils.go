@@ -31,6 +31,9 @@ func (slice sortPlanRoute) Swap(i, j int) {
 //
 // planController
 //
+func (control planController) fastRate() float64 {
+	return 0.2 // 1/5
+}
 
 func (control planController) speed() float64 {
 	return 0.88 * 60 // pre minutes // old man was 0.88 pre second, young man was 1.27
