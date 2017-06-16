@@ -27,6 +27,7 @@ type Attraction struct {
 	Introductions string       `json:"introductions,omitempty" bson:"introductions,omitempty"`
 	Summaries     []summary    `json:"summaries,omitempty" bson:"summaries,omitempty"`
 	Realtime      interface{}  `json:"realtime,omitempty" bson:"realtime,omitempty"`
+	HotIndex      float64      `json:"index_hot,omitempty" bson:"index_hot,omitempty"`
 	// IsFastpass    bool         `json:"is_fastpass,omitempty" bson:"is_fastpass,omitempty"`
 }
 

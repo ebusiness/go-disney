@@ -67,6 +67,7 @@ func (control attractionController) list(c *gin.Context) {
 			pipeline = (utils.BsonCreator{}).
 				Append(pipeline...).
 				LookupWithUnwind("attractions_hot", "str_id", "str_id", "hot", "").
+				Append(bson.M{"$addFields": bson.M{"index_hot": "$hot.hot"}}).
 				Append(bson.M{"$sort": bson.M{"hot.hot": -1}}).
 				Pipeline
 		}
@@ -77,6 +78,9 @@ func (control attractionController) list(c *gin.Context) {
 		models := []models.Attraction{}
 		mongo := middleware.GetMongo(c)
 		collection := mongo.GetCollection(models)
+
+		// res := []bson.M{}
+		// log.Println("test")
 		err := collection.Pipe(pipeline).All(&models)
 		return models, err
 	}
@@ -100,6 +104,8 @@ func (control attractionController) detail(c *gin.Context) {
 			GraphLookup("limiteds", "$limited", "limited", "_id", "limited", control.lang).
 			GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags", control.lang).
 			Append(control.lookupSummaryTags()...).
+			LookupWithUnwind("attractions_hot", "str_id", "str_id", "hot", "").
+			Append(bson.M{"$addFields": bson.M{"index_hot": "$hot.hot"}}).
 			Pipeline, nil
 	}
 	exec := func(param interface{}) (interface{}, error) {

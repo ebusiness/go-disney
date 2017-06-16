@@ -15,7 +15,4 @@ before_install:
 # - docker run -d --name mongo -p 27017:27017 mvertes/alpine-mongo
 
 script:
-  - go test -v middleware/*.go
-  - go test -v v1/*.go
-  - go test -v v1/algorithms/*.go
-  - go test -v utils/*.go
+  - sh scripts/test.sh
