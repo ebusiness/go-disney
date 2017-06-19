@@ -134,18 +134,39 @@ func (control planController) getConditionsForPlanList(conditions ...bson.M) []b
 func (control planController) getPredictionWaittime(c *gin.Context, item models.PlanRoute, datetime time.Time) float64 {
 	waittime := algorithms.CalculateWaitTime(item.StrID, datetime)
 	predictions := waittime.List(c)
+	datetime = utils.TokyoTime(datetime)
 	for _, prediction := range predictions {
-		if datetime.Hour() > prediction.CreateTime.Hour() {
+		predictionTime := utils.TokyoTime(prediction.CreateTime)
+
+		if !control.isValidWaittime(datetime, predictionTime) {
 			continue
 		}
-		if datetime.Minute() > prediction.CreateTime.Minute() {
-			continue
-		}
+
 		if prediction.WaitTime != nil {
+			// log.Println(datetime, datetime.Hour(), datetime.Minute())
+			// log.Println(predictionTime, predictionTime.Hour(), predictionTime.Minute())
+			// log.Println(*prediction.WaitTime)
 			return *prediction.WaitTime
 		}
 	}
+	// log.Println(item.StrID, datetime, datetime.Hour(), datetime.Minute())
 	return 0
+}
+
+func (control planController) isValidWaittime(datetime, predictionTime time.Time) bool {
+	if datetime.Hour() > predictionTime.Hour() {
+		return false
+	}
+
+	if datetime.Hour() < predictionTime.Hour() {
+		return true
+	}
+
+	if datetime.Minute() > predictionTime.Minute() {
+		return false
+	}
+
+	return true
 }
 
 func (control planController) getPlan(mongo middleware.Mongo, datetime time.Time) (models.PlanTemplate, error) {
