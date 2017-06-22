@@ -89,3 +89,8 @@ func (m *Mongo) GetCollection(i interface{}) *mgo.Collection {
 	name := field.Tag.Get("collectionName")
 	return m.database.C(name)
 }
+
+//GetCollectionByName - get the Collection by collection name
+func (m *Mongo) GetCollectionByName(name string) *mgo.Collection {
+	return m.database.C(name)
+}
