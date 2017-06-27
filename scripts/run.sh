@@ -12,6 +12,7 @@ docker run -it --rm \
       -e MONGOSERVER=mongo \
       -p 8080:443 \
       -v $(pwd):/go/src/github.com/ebusiness/go-disney \
+      -v $(pwd)/asset:/asset \
       golang:alpine sh -c '
 cd /go/src/github.com/ebusiness/go-disney
 
@@ -24,3 +25,13 @@ go run main.go
 # release
 # go build -o server main.go
 '
+
+docker run -it --name disney \
+      --link redis:redis \
+      -e REDISSERVER=redis \
+      --link mongo:mongo \
+      -e MONGOSERVER=mongo \
+      -p 443:443 \
+      -v $(pwd):/go/src/github.com/ebusiness/go-disney \
+      -v $(pwd)/asset:/asset \
+      golang:alpine sh

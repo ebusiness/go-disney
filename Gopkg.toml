@@ -14,3 +14,11 @@
 [[constraint]]
   name = "github.com/ahmetb/go-linq"
   version = "v3.0.0"
+
+[[constraint]]
+  name = "github.com/llgcode/draw2d"
+  revision = "dcbfbe505d35de8166ccfc47ff9e4bb020473e18"
+  
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "v1.0.0"

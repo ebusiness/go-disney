@@ -43,7 +43,7 @@ func (app appBase) index(c *gin.Context) {
 }
 
 func (app appBase) notFound(c *gin.Context) {
-	c.JSON(http.StatusOK, []gin.H{
+	c.JSON(http.StatusNotFound, []gin.H{
 		app.routers("v1", V1),
 	})
 }

@@ -1,0 +1,631 @@
+[{
+    "str_id": "al_rainbow",
+    "point": {
+        "x": 228,
+        "y": 452
+    }
+}, {
+    "str_id": "al_minnie",
+    "point": {
+        "x": 257,
+        "y": 613
+    }
+}, {
+    "str_id": "wl_company",
+    "point": {
+        "x": 342,
+        "y": 327
+    }
+}, {
+    "str_id": "wl_super",
+    "point": {
+        "x": 372,
+        "y": 402
+    }
+}, {
+    "str_id": "al_lilo",
+    "point": {
+        "x": 227,
+        "y": 455
+    }
+}, {
+    "str_id": "plaza_once",
+    "point": {
+        "x": 471,
+        "y": 353
+    }
+}, {
+    "str_id": "wl_horse",
+    "point": {
+        "x": 334,
+        "y": 335
+    }
+}, {
+    "str_id": "pw_tanabata2017_tdl",
+    "point": {
+        "x": 473,
+        "y": 413
+    }
+}, {
+    "str_id": "pw_usatama",
+    "point": {
+        "x": 473,
+        "y": 413
+    }
+}, {
+    "str_id": "tdl_summer2017",
+    "point": {
+        "x": 473,
+        "y": 413
+    }
+}, {
+    "str_id": "pw_hion",
+    "point": {
+        "x": 473,
+        "y": 413
+    }
+}, {
+    "str_id": "tl_one",
+    "point": {
+        "x": 764,
+        "y": 590
+    }
+}, {
+    "str_id": "pw_happiness",
+    "point": {
+        "x": 473,
+        "y": 413
+    }
+}, {
+    "str_id": "mh_fantasmic",
+    "point": {
+        "x": 483,
+        "y": 477
+    }
+}, {
+    "str_id": "mh_tanabata2017_tds",
+    "point": {
+        "x": 483,
+        "y": 477
+    }
+}, {
+    "str_id": "aw_step",
+    "point": {
+        "x": 104,
+        "y": 423
+    }
+}, {
+    "str_id": "pw_dreamlights",
+    "point": {
+        "x": 469,
+        "y": 412
+    }
+}, {
+    "str_id": "pw_hion_s",
+    "point": {
+        "x": 477,
+        "y": 402
+    }
+}, {
+    "str_id": "tds_summer2017",
+    "point": {
+        "x": 491,
+        "y": 473
+    }
+}, {
+    "str_id": "aw_duffy",
+    "point": {
+        "x": 298,
+        "y": 376
+    }
+}, {
+    "str_id": "ml_triton",
+    "point": {
+        "x": 255,
+        "y": 263
+    }
+}, {
+    "str_id": "mh_fe",
+    "point": {
+        "x": 493,
+        "y": 561
+    }
+}, {
+    "str_id": "ld_oos",
+    "point": {
+        "x": 457,
+        "y": 176
+    }
+}, {
+    "str_id": "aw_band",
+    "point": {
+        "x": 246,
+        "y": 618
+    }
+}, {
+    "str_id": "gre_rental",
+    "point": {
+        "x": 499,
+        "y": 714
+    }
+}, {
+    "str_id": "gre_mainst",
+    "point": {
+        "x": 435,
+        "y": 713
+    }
+}, {
+    "str_id": "camp_trail_daisy",
+    "point": {
+        "x": 114,
+        "y": 232
+    }
+}, {
+    "str_id": "camp_trail_donald",
+    "point": {
+        "x": 113,
+        "y": 229
+    }
+}, {
+    "str_id": "tt_mickey",
+    "point": {
+        "x": 842,
+        "y": 257
+    }
+}, {
+    "str_id": "gre_capecod",
+    "point": {
+        "x": 223,
+        "y": 538
+    }
+}, {
+    "str_id": "aw_greeting",
+    "point": {
+        "x": 236,
+        "y": 378
+    }
+}, {
+    "str_id": "ld_saludos",
+    "point": {
+        "x": 532,
+        "y": 164
+    }
+}, {
+    "str_id": "pd_horizon",
+    "point": {
+        "x": 382,
+        "y": 256
+    }
+}, {
+    "str_id": "ld_trail_goofy",
+    "point": {
+        "x": 425,
+        "y": 69
+    }
+}, {
+    "str_id": "ml_greeting",
+    "point": {
+        "x": 702,
+        "y": 362
+    }
+}, {
+    "str_id": "gre_arabian",
+    "point": {
+        "x": 770,
+        "y": 99
+    }
+}, {
+    "str_id": "ld_trail_minnie",
+    "point": {
+        "x": 457,
+        "y": 52
+    }
+}, {
+    "str_id": "gre_plaza",
+    "point": {
+        "x": 466,
+        "y": 670
+    }
+}, {
+    "str_id": "ld_trail_mickey",
+    "point": {
+        "x": 423,
+        "y": 70
+    }
+}, {
+    "str_id": "wb_omnibus",
+    "point": {
+        "x": 528,
+        "y": 450
+    }
+}, {
+    "str_id": "al_western",
+    "point": {
+        "x": 213,
+        "y": 494
+    }
+}, {
+    "str_id": "al_jungle",
+    "point": {
+        "x": 235,
+        "y": 525
+    }
+}, {
+    "str_id": "wb_penny",
+    "point": {
+        "x": 482,
+        "y": 586
+    }
+}, {
+    "str_id": "al_carib",
+    "point": {
+        "x": 348,
+        "y": 597
+    }
+}, {
+    "str_id": "al_tiki",
+    "point": {
+        "x": 250,
+        "y": 437
+    }
+}, {
+    "str_id": "al_swiss",
+    "point": {
+        "x": 304,
+        "y": 435
+    }
+}, {
+    "str_id": "wl_gallery",
+    "point": {
+        "x": 174,
+        "y": 375
+    }
+}, {
+    "str_id": "wl_country",
+    "point": {
+        "x": 272,
+        "y": 328
+    }
+}, {
+    "str_id": "wl_mark",
+    "point": {
+        "x": 294,
+        "y": 237
+    }
+}, {
+    "str_id": "wl_tom",
+    "point": {
+        "x": 206,
+        "y": 259
+    }
+}, {
+    "str_id": "cc_splash",
+    "point": {
+        "x": 314,
+        "y": 80
+    }
+}, {
+    "str_id": "wl_mountain",
+    "point": {
+        "x": 152,
+        "y": 334
+    }
+}, {
+    "str_id": "cc_beaver",
+    "point": {
+        "x": 182,
+        "y": 116
+    }
+}, {
+    "str_id": "fl_alice",
+    "point": {
+        "x": 539,
+        "y": 200
+    }
+}, {
+    "str_id": "fl_castle",
+    "point": {
+        "x": 488,
+        "y": 204
+    }
+}, {
+    "str_id": "fl_small",
+    "point": {
+        "x": 552,
+        "y": 121
+    }
+}, {
+    "str_id": "fl_snow",
+    "point": {
+        "x": 417,
+        "y": 253
+    }
+}, {
+    "str_id": "fl_dumbo",
+    "point": {
+        "x": 422,
+        "y": 206
+    }
+}, {
+    "str_id": "fl_cinderella",
+    "point": {
+        "x": 468,
+        "y": 331
+    }
+}, {
+    "str_id": "fl_peter",
+    "point": {
+        "x": 371,
+        "y": 250
+    }
+}, {
+    "str_id": "fl_pinocchio",
+    "point": {
+        "x": 568,
+        "y": 241
+    }
+}, {
+    "str_id": "fl_philhar",
+    "point": {
+        "x": 527,
+        "y": 259
+    }
+}, {
+    "str_id": "tt_donald",
+    "point": {
+        "x": 790,
+        "y": 264
+    }
+}, {
+    "str_id": "fl_haunted",
+    "point": {
+        "x": 423,
+        "y": 144
+    }
+}, {
+    "str_id": "tt_gadget",
+    "point": {
+        "x": 834,
+        "y": 294
+    }
+}, {
+    "str_id": "stitch",
+    "point": {
+        "x": 621,
+        "y": 432
+    }
+}, {
+    "str_id": "tt_minnie",
+    "point": {
+        "x": 857,
+        "y": 207
+    }
+}, {
+    "str_id": "tl_mountain",
+    "point": {
+        "x": 745,
+        "y": 501
+    }
+}, {
+    "str_id": "mh_gondolas",
+    "point": {
+        "x": 396,
+        "y": 585
+    }
+}, {
+    "str_id": "aw_toy",
+    "point": {
+        "x": 157,
+        "y": 680
+    }
+}, {
+    "str_id": "tt_goofy",
+    "point": {
+        "x": 770,
+        "y": 240
+    }
+}, {
+    "str_id": "mh_fortress",
+    "point": {
+        "x": 455,
+        "y": 400
+    }
+}, {
+    "str_id": "tt_toon",
+    "point": {
+        "x": 726,
+        "y": 236
+    }
+}, {
+    "str_id": "ld_indiana",
+    "point": {
+        "x": 555,
+        "y": 78
+    }
+}, {
+    "str_id": "tt_rabbit",
+    "point": {
+        "x": 778,
+        "y": 71
+    }
+}, {
+    "str_id": "fl_pooh",
+    "point": {
+        "x": 672,
+        "y": 175
+    }
+}, {
+    "str_id": "tt_chip",
+    "point": {
+        "x": 858,
+        "y": 265
+    }
+}, {
+    "str_id": "tl_tours",
+    "point": {
+        "x": 735,
+        "y": 460
+    }
+}, {
+    "str_id": "aw_transit",
+    "point": {
+        "x": 213,
+        "y": 386
+    }
+}, {
+    "str_id": "ac_jasmine",
+    "point": {
+        "x": 750,
+        "y": 63
+    }
+}, {
+    "str_id": "tl_buzz",
+    "point": {
+        "x": 616,
+        "y": 473
+    }
+}, {
+    "str_id": "ml_flounder",
+    "point": {
+        "x": 632,
+        "y": 198
+    }
+}, {
+    "str_id": "tl_jets",
+    "point": {
+        "x": 669,
+        "y": 284
+    }
+}, {
+    "str_id": "mh_transit",
+    "point": {
+        "x": 571,
+        "y": 459
+    }
+}, {
+    "str_id": "pd_searider",
+    "point": {
+        "x": 311,
+        "y": 131
+    }
+}, {
+    "str_id": "mi_center",
+    "point": {
+        "x": 489,
+        "y": 308
+    }
+}, {
+    "str_id": "aw_railway",
+    "point": {
+        "x": 255,
+        "y": 546
+    }
+}, {
+    "str_id": "aw_tot",
+    "point": {
+        "x": 163,
+        "y": 561
+    }
+}, {
+    "str_id": "tl_monster",
+    "point": {
+        "x": 601,
+        "y": 642
+    }
+}, {
+    "str_id": "pd_railway",
+    "point": {
+        "x": 396,
+        "y": 204
+    }
+}, {
+    "str_id": "ac_sindbad",
+    "point": {
+        "x": 786,
+        "y": 90
+    }
+}, {
+    "str_id": "aw_big",
+    "point": {
+        "x": 188,
+        "y": 448
+    }
+}, {
+    "str_id": "ml_scuttle",
+    "point": {
+        "x": 660,
+        "y": 269
+    }
+}, {
+    "str_id": "ac_caravan",
+    "point": {
+        "x": 827,
+        "y": 298
+    }
+}, {
+    "str_id": "mi_20000",
+    "point": {
+        "x": 585,
+        "y": 350
+    }
+}, {
+    "str_id": "aw_turtle",
+    "point": {
+        "x": 92,
+        "y": 453
+    }
+}, {
+    "str_id": "pd_aqua",
+    "point": {
+        "x": 261,
+        "y": 214
+    }
+}, {
+    "str_id": "ld_transit",
+    "point": {
+        "x": 569,
+        "y": 162
+    }
+}, {
+    "str_id": "ac_magic",
+    "point": {
+        "x": 844,
+        "y": 243
+    }
+}, {
+    "str_id": "ml_jelly",
+    "point": {
+        "x": 557,
+        "y": 241
+    }
+}, {
+    "str_id": "ml_pool",
+    "point": {
+        "x": 564,
+        "y": 241
+    }
+}, {
+    "str_id": "ml_balloon",
+    "point": {
+        "x": 558,
+        "y": 232
+    }
+}, {
+    "str_id": "ld_raging",
+    "point": {
+        "x": 684,
+        "y": 62
+    }
+}, {
+    "str_id": "ml_play",
+    "point": {
+        "x": 583,
+        "y": 237
+    }
+}, {
+    "str_id": "ml_theater",
+    "point": {
+        "x": 554,
+        "y": 224
+    }
+}]

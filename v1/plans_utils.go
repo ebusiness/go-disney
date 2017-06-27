@@ -196,12 +196,3 @@ func (control planController) createIndex(collection *mgo.Collection) {
 		log.Println("EnsureIndex", err)
 	}
 }
-
-func (control planController) saveCustomizePlan(mongo middleware.Mongo, template models.PlanTemplate) {
-	model := models.PlanCustomize{PlanTemplate: template, Lang: control.lang}
-	model.PlanTemplate.ID = bson.NewObjectId()
-
-	collection := mongo.GetCollection(model)
-	err := collection.Insert(model)
-	log.Println("saveCustomizePlan", err)
-}

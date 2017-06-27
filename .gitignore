@@ -16,3 +16,6 @@ vendor/
 
 server
 sync.sh
+
+asset/plans/*
+!asset/plans/.gitkeep

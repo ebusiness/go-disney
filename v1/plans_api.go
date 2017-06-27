@@ -110,6 +110,7 @@ func (control planController) customize(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotAcceptable)
 		return
 	}
+	model.ID = bson.NewObjectId()
 
 	mongo := middleware.GetMongo(c)
 	ids := []string{}
@@ -143,6 +144,6 @@ func (control planController) customize(c *gin.Context) {
 	}
 	model = control.algonrithmsWaittime(c, model, *model.Start)
 
-	control.saveCustomizePlan(mongo, model)
+	control.cachePlan(mongo, model)
 	c.JSON(http.StatusOK, model)
 }
