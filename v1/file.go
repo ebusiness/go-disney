@@ -8,7 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
-	"os"
+	// "os"
+	"strconv"
 	"time"
 )
 
@@ -33,15 +34,15 @@ func (control *fileController) plan(c *gin.Context) {
 	// if _, err := os.Stat("/path/to/whatever"); os.IsNotExist(err) {
 	// 	// path/to/whatever does not exist
 	// }
-	if _, err := os.Stat(filepath); err != nil {
 
-		mongo := middleware.GetMongo(c)
-		planData := control.getPlan(mongo)
-		if len(planData) == 0 {
-			planData = control.getPlanTemplate(mongo)
-		}
-		control.drawImage(filepath, planData)
+	// if _, err := os.Stat(filepath); err != nil {
+	mongo := middleware.GetMongo(c)
+	planData := control.getPlan(mongo)
+	if len(planData) == 0 {
+		planData = control.getPlanTemplate(mongo)
 	}
+	control.drawImage(filepath, planData)
+	// }
 	c.File(filepath)
 }
 
@@ -56,17 +57,14 @@ func (control fileController) drawImage(filepath string, planData []bson.M) {
 	draw := utils.NewPlanDraw(resID)
 	points := []utils.DrawPoint{}
 	for _, item := range planData {
-		coord := item["coord"].(bson.M)
-		point := utils.DrawPoint{coord["x"].(float64), coord["y"].(float64)}
-		points = append(points, point)
+		points = append(points, control.getPoint(item["coord"]))
 	}
 	// draw.DrawMark("showwait20", utils.DrawPoint{200, 200})
 	draw.DrawLines(points)
 
-	for _, item := range planData {
+	for index, item := range planData {
 		category := item["category"]
-		coord := item["coord"].(bson.M)
-		point := utils.DrawPoint{coord["x"].(float64), coord["y"].(float64)}
+		point := control.getPoint(item["coord"])
 
 		rank := control.getRankString(item["waitTime"])
 		markName := "wait" + rank
@@ -75,21 +73,32 @@ func (control fileController) drawImage(filepath string, planData []bson.M) {
 		}
 
 		draw.DrawMark(markName, point)
+		draw.DrawString(strconv.Itoa(index+1), point)
 	}
 	draw.SaveImage(filepath)
 	log.Println(filepath)
 	// log.Println(planData)
 }
 
+func (control fileController) getPoint(elem interface{}) utils.DrawPoint {
+	coord := elem.(bson.M)
+	y := coord["y"].(float64)
+	if y < 96 {
+		y = 96
+	}
+	x := coord["x"].(float64)
+	if x > 700 {
+		x -= 48
+	}
+	return utils.DrawPoint{x, y}
+}
 func (control fileController) getRankString(elem interface{}) (rank string) {
 	rank = "20"
 	if elem == nil {
 		return
 	}
-	waitTime := elem.(float64)
-	if waitTime > 70 {
-		rank = "70"
-	} else if waitTime > 60 {
+	waitTime := elem.(float64) * 4
+	if waitTime > 60 {
 		rank = "60"
 	} else if waitTime > 50 {
 		rank = "50"

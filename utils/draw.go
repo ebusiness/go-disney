@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/llgcode/draw2d"
 	"github.com/llgcode/draw2d/draw2dimg"
 	log "github.com/sirupsen/logrus"
 	"image"
@@ -15,18 +16,16 @@ import (
 var planResources = map[string]string{
 	"land":       "disneyland.png",
 	"sea":        "disneysea.png",
-	"wait20":     "blue.png",
-	"wait30":     "green.png",
-	"wait40":     "orange.png",
-	"wait50":     "deeporange.png",
-	"wait60":     "red.png",
-	"wait70":     "deepred.png",
-	"showwait20": "show_blue.png",
-	"showwait30": "show_green.png",
-	"showwait40": "show_orange.png",
-	"showwait50": "show_deeporange.png",
-	"showwait60": "show_red.png",
-	"showwait70": "show_deepred.png",
+	"wait20":     "verysatisfied.png",
+	"wait30":     "satisfied.png",
+	"wait40":     "neutral.png",
+	"wait50":     "dissatisfied.png",
+	"wait60":     "verydissatisfied.png",
+	"showwait20": "showverysatisfied.png",
+	"showwait30": "showsatisfied.png",
+	"showwait40": "showneutral.png",
+	"showwait50": "showdissatisfied.png",
+	"showwait60": "showverydissatisfied.png",
 }
 
 // load an image
@@ -77,7 +76,19 @@ func (pd *PlanDraw) DrawMark(resID string, point DrawPoint) *PlanDraw {
 	mark := loadImage(resID)
 	offset := image.Pt(int(point.X)-mark.Bounds().Max.X/2, int(point.Y)-mark.Bounds().Max.Y)
 	draw.Draw(pd.dst, mark.Bounds().Add(offset), mark, image.ZP, draw.Over)
+	return pd
+}
 
+// DrawString -
+func (pd *PlanDraw) DrawString(str string, point DrawPoint) *PlanDraw {
+	gc := draw2dimg.NewGraphicContext(pd.dst)
+	draw2d.SetFontFolder("/asset/font")
+	gc.SetFontData(draw2d.FontData{Name: "luxi", Style: draw2d.FontStyleBold})
+	gc.SetFillColor(image.White)
+	// gc.SetFillColor(image.NewUniform(color.RGBA{0x21, 0x96, 0xf3, 0xff}))
+	gc.SetFontSize(24)
+	gc.FillStringAt(str, point.X, point.Y)
+	// DrawString(pd.dst, int(point.X), int(point.Y), str, color.White)
 	return pd
 }
 
@@ -89,7 +100,7 @@ func (pd *PlanDraw) DrawLines(lines []DrawPoint) *PlanDraw {
 	gc := draw2dimg.NewGraphicContext(pd.dst)
 	// Set some properties
 	// gc.SetFillColor(color.RGBA{0x44, 0xff, 0x44, 0xff})
-	gc.SetStrokeColor(color.Black)
+	gc.SetStrokeColor(color.RGBA{0x00, 0x00, 0x00, 0x88})
 	gc.SetLineWidth(5)
 
 	for index, line := range lines {
@@ -99,7 +110,7 @@ func (pd *PlanDraw) DrawLines(lines []DrawPoint) *PlanDraw {
 		}
 		gc.LineTo(line.X, line.Y)
 	}
-	gc.Close()
+	// gc.Close()
 	gc.Stroke()
 
 	return pd
