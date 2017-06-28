@@ -8,76 +8,127 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
-	// "os"
+	"os"
 	"strconv"
 	"time"
 )
 
 func init() {
 	control := &fileController{}
-	utils.V1.GET("/files/plans/:id", control.plan)
+	utils.V1.GET("/files/plans/:id", control.planIndex)
+	utils.V1.GET("/files/plans/:id/waittime", control.planWaittime)
+	utils.V1.GET("/files/plans/:id/categroy", control.planCategroy)
 }
 
 type fileController struct {
 	baseController
 }
 
-func (control *fileController) plan(c *gin.Context) {
-	control.initialization(c)
+func (control *fileController) planIndex(c *gin.Context) {
+	control.drawImage(c, "index", true, func(draw *utils.PlanDraw, index int, item bson.M, point utils.DrawPoint) {
+		draw.DrawMark("mark20", point)
 
-	if len(control.id) < 1 || !bson.IsObjectIdHex(control.id) {
+		draw.DrawMark("round", point.Add(0, -42))
+
+		var x float64 = -7
+		if index > 8 {
+			x = -13.0
+		}
+		draw.DrawString(strconv.Itoa(index+1), point.Add(x, -52))
+	})
+}
+func (control *fileController) planWaittime(c *gin.Context) {
+	control.drawImage(c, "waittime", false, func(draw *utils.PlanDraw, index int, item bson.M, point utils.DrawPoint) {
+		rank := control.getRankString(item["waitTime"])
+
+		draw.DrawMark("mark"+rank, point)
+
+		draw.DrawMark("waiticon"+rank, point.Add(0, -42))
+	})
+}
+func (control *fileController) planCategroy(c *gin.Context) { //with FP
+	control.drawImage(c, "waittime", false, func(draw *utils.PlanDraw, index int, item bson.M, point utils.DrawPoint) {
+		rank := control.getRankString(item["waitTime"])
+
+		draw.DrawMark("mark"+rank, point)
+
+		category := item["category"]
+		if category != nil {
+			draw.DrawMark(category.(string), point.Add(0, -42))
+		}
+
+		fastpass := item["fastpass"]
+		if fastpass != nil {
+			draw.DrawMark("fp", point.Add(26, -68))
+		}
+	})
+}
+
+func (control *fileController) drawImage(c *gin.Context, filename string,
+	isDrawLines bool,
+	drawFunc func(*utils.PlanDraw, int, bson.M, utils.DrawPoint)) {
+
+	filepath := control.beforeDraw(c, filename)
+
+	if len(filepath) == 0 {
+		return
+	}
+
+	mongo := middleware.GetMongo(c)
+	planData := control.getPlan(mongo)
+	if len(planData) == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	filepath := "/asset/plans/" + control.park + control.id
-	// if _, err := os.Stat("/path/to/whatever"); os.IsNotExist(err) {
-	// 	// path/to/whatever does not exist
-	// }
-
-	// if _, err := os.Stat(filepath); err != nil {
-	mongo := middleware.GetMongo(c)
-	planData := control.getPlan(mongo)
-	if len(planData) == 0 {
-		planData = control.getPlanTemplate(mongo)
-	}
-	control.drawImage(filepath, planData)
-	// }
-	c.File(filepath)
-}
-
-func (control fileController) drawImage(filepath string, planData []bson.M) {
-	if len(planData) == 0 {
-		return
-	}
 	resID := "land"
 	if "2" == control.park {
 		resID = "sea"
 	}
-	draw := utils.NewPlanDraw(resID)
+	withbackground := c.Query("withbg")
+
+	draw := utils.NewPlanDraw(resID, withbackground != "")
+
+	if isDrawLines {
+		control.drawLines(draw, planData)
+	}
+
+	for index, item := range planData {
+		point := control.getPoint(item["coord"])
+		drawFunc(draw, index, item, point)
+	}
+	draw.SaveImage(filepath)
+	c.File(filepath)
+}
+
+func (control *fileController) beforeDraw(c *gin.Context, filename string) string {
+
+	control.initialization(c)
+
+	if len(control.id) < 1 || !bson.IsObjectIdHex(control.id) {
+		c.AbortWithStatus(http.StatusNotFound)
+		return ""
+	}
+	path := "/asset/plans/" + control.park + "_" + control.id
+	os.MkdirAll(path, 0777)
+	filepath := path + "/" + filename
+	// if _, err := os.Stat("/path/to/whatever"); os.IsNotExist(err) {
+	// 	// path/to/whatever does not exist
+	// }
+	if _, err := os.Stat(filepath); err == nil && false {
+		c.File(filepath)
+		return ""
+	}
+	return filepath
+}
+
+func (control *fileController) drawLines(draw *utils.PlanDraw, planData []bson.M) {
 	points := []utils.DrawPoint{}
 	for _, item := range planData {
 		points = append(points, control.getPoint(item["coord"]))
 	}
 	// draw.DrawMark("showwait20", utils.DrawPoint{200, 200})
 	draw.DrawLines(points)
-
-	for index, item := range planData {
-		category := item["category"]
-		point := control.getPoint(item["coord"])
-
-		rank := control.getRankString(item["waitTime"])
-		markName := "wait" + rank
-		if "show" == category {
-			markName = "show" + markName
-		}
-
-		draw.DrawMark(markName, point)
-		draw.DrawString(strconv.Itoa(index+1), point)
-	}
-	draw.SaveImage(filepath)
-	log.Println(filepath)
-	// log.Println(planData)
 }
 
 func (control fileController) getPoint(elem interface{}) utils.DrawPoint {
@@ -90,7 +141,7 @@ func (control fileController) getPoint(elem interface{}) utils.DrawPoint {
 	if x > 700 {
 		x -= 48
 	}
-	return utils.DrawPoint{x, y}
+	return utils.DrawPoint{X: x, Y: y}
 }
 func (control fileController) getRankString(elem interface{}) (rank string) {
 	rank = "20"
@@ -120,10 +171,6 @@ func (control fileController) getDatetime(c *gin.Context) time.Time {
 	return datetime
 }
 
-func (control fileController) makePlanFiles() {
-
-}
-
 func (control fileController) getPlan(mongo middleware.Mongo) []bson.M {
 	match := bson.M{
 		"_id": bson.ObjectIdHex(control.id),
@@ -144,6 +191,7 @@ func (control fileController) getPlan(mongo middleware.Mongo) []bson.M {
 				"str_id":   "$route.str_id",
 				"category": "$route.attraction.category",
 				"waitTime": "$route.waitTime",
+				"fastpass": "$route.fastpass",
 				"coord":    "$location.point",
 			},
 		},
@@ -153,6 +201,9 @@ func (control fileController) getPlan(mongo middleware.Mongo) []bson.M {
 
 	res := []bson.M{}
 	mongo.GetCollectionByName("cache_plans").Pipe(pipeline).All(&res)
+	if len(res) == 0 {
+		res = control.getPlanTemplate(mongo)
+	}
 	return res
 }
 
@@ -172,12 +223,22 @@ func (control fileController) getPlanTemplate(mongo middleware.Mongo) []bson.M {
 			},
 		},
 		{
+			"$lookup": bson.M{
+				"from":         "attractions",
+				"localField":   "route.str_id",
+				"foreignField": "str_id",
+				"as":           "attraction",
+			},
+		},
+		{
 			"$project": bson.M{
-				"str_id": "$route.str_id",
-				"coord":  "$location.point",
+				"str_id":   "$route.str_id",
+				"category": "$attraction.category",
+				"coord":    "$location.point",
 			},
 		},
 		{"$unwind": "$coord"},
+		{"$unwind": "$category"},
 	}
 
 	res := []bson.M{}

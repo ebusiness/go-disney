@@ -16,16 +16,21 @@ import (
 var planResources = map[string]string{
 	"land":       "disneyland.png",
 	"sea":        "disneysea.png",
-	"wait20":     "verysatisfied.png",
-	"wait30":     "satisfied.png",
-	"wait40":     "neutral.png",
-	"wait50":     "dissatisfied.png",
-	"wait60":     "verydissatisfied.png",
-	"showwait20": "showverysatisfied.png",
-	"showwait30": "showsatisfied.png",
-	"showwait40": "showneutral.png",
-	"showwait50": "showdissatisfied.png",
-	"showwait60": "showverydissatisfied.png",
+	"round":      "round.png",
+	"attraction": "icon_attraction.png",
+	"show":       "icon_show.png",
+	"greeting":   "icon_greeting.png",
+	"fp":         "icon_fp.png",
+	"mark20":     "verysatisfied.png",
+	"mark30":     "satisfied.png",
+	"mark40":     "neutral.png",
+	"mark50":     "dissatisfied.png",
+	"mark60":     "verydissatisfied.png",
+	"waiticon20": "icon_verysatisfied.png",
+	"waiticon30": "icon_satisfied.png",
+	"waiticon40": "icon_neutral.png",
+	"waiticon50": "icon_dissatisfied.png",
+	"waiticon60": "icon_verydissatisfied.png",
 }
 
 // load an image
@@ -51,12 +56,16 @@ func loadImage(resID string) image.Image {
 }
 
 // NewPlanDraw make a draw with bacground image name
-func NewPlanDraw(resID string) *PlanDraw {
+func NewPlanDraw(resID string, isWithBackground bool) *PlanDraw {
 	img := loadImage(resID)
 
 	b := img.Bounds()
 	m := image.NewRGBA(b)
-	draw.Draw(m, b, img, image.ZP, draw.Src)
+	if isWithBackground {
+		draw.Draw(m, b, img, image.ZP, draw.Src)
+	} else {
+		draw.Draw(m, b, image.Transparent, image.ZP, draw.Src)
+	}
 
 	return &PlanDraw{m}
 }
@@ -64,6 +73,14 @@ func NewPlanDraw(resID string) *PlanDraw {
 // DrawPoint -
 type DrawPoint struct {
 	X, Y float64
+}
+
+// Add returns the rectangle r translated by p.
+func (dp DrawPoint) Add(x, y float64) DrawPoint {
+	return DrawPoint{
+		dp.X + x,
+		dp.Y + y,
+	}
 }
 
 // PlanDraw -
@@ -86,7 +103,7 @@ func (pd *PlanDraw) DrawString(str string, point DrawPoint) *PlanDraw {
 	gc.SetFontData(draw2d.FontData{Name: "luxi", Style: draw2d.FontStyleBold})
 	gc.SetFillColor(image.White)
 	// gc.SetFillColor(image.NewUniform(color.RGBA{0x21, 0x96, 0xf3, 0xff}))
-	gc.SetFontSize(24)
+	gc.SetFontSize(20)
 	gc.FillStringAt(str, point.X, point.Y)
 	// DrawString(pd.dst, int(point.X), int(point.Y), str, color.White)
 	return pd
