@@ -8,6 +8,6 @@ import (
 type Plan struct {
 	collectionName string `collectionName:"cache_plans"`
 	PlanTemplate   `bson:",inline"`
-	TemplateID     bson.ObjectId `json:"template_id" bson:"template_id"`
-	Lang           string        `json:",none" bson:"lang,omitempty"`
+	TemplateID     *bson.ObjectId `json:",none" bson:"template_id,omitempty"`
+	Lang           string         `json:",none" bson:"lang,omitempty"`
 }

@@ -68,6 +68,7 @@ func (control planController) detail(c *gin.Context) {
 
 	datetime := control.getDatetime(c)
 	mongo := middleware.GetMongo(c)
+	templateID := bson.ObjectIdHex(control.id)
 
 	getPlanFromCache := func(param interface{}) (interface{}, error) {
 		model, err := control.getPlan(mongo, datetime)
@@ -82,11 +83,12 @@ func (control planController) detail(c *gin.Context) {
 		}
 		model := models.PlanTemplate{}
 		collection := mongo.GetCollection(model)
-		pipeline := control.getConditionsForPlanList(bson.M{"$match": bson.M{"_id": bson.ObjectIdHex(control.id)}})
+		pipeline := control.getConditionsForPlanList(bson.M{"$match": bson.M{"_id": templateID}})
 		err := collection.Pipe(pipeline).One(&model)
 		if err != nil {
 			c.JSON(http.StatusNotFound, nil)
 		}
+		model.ID = bson.NewObjectId()
 		return model, err
 	}
 	exec := func(param interface{}) (interface{}, error) {
@@ -94,7 +96,7 @@ func (control planController) detail(c *gin.Context) {
 		if model.Start == nil {
 			model.Start = &datetime
 			model = control.algonrithmsWaittime(c, model, datetime)
-			control.cachePlan(mongo, model)
+			control.cachePlan(mongo, model, &templateID)
 		}
 		return model, nil
 	}
@@ -110,7 +112,6 @@ func (control planController) customize(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotAcceptable)
 		return
 	}
-	model.ID = bson.NewObjectId()
 
 	mongo := middleware.GetMongo(c)
 	ids := []string{}
@@ -143,7 +144,8 @@ func (control planController) customize(c *gin.Context) {
 		}
 	}
 	model = control.algonrithmsWaittime(c, model, *model.Start)
+	model.ID = bson.NewObjectId()
 
-	control.cachePlan(mongo, model)
+	control.cachePlan(mongo, model, nil)
 	c.JSON(http.StatusOK, model)
 }

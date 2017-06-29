@@ -174,6 +174,10 @@ func (control fileController) getDatetime(c *gin.Context) time.Time {
 func (control fileController) getPlan(mongo middleware.Mongo) []bson.M {
 	match := bson.M{
 		"_id": bson.ObjectIdHex(control.id),
+		// "$or": []bson.M{
+		// 	{"template_id": bson.ObjectIdHex(control.id)},
+		// 	{"_id": bson.ObjectIdHex(control.id)},
+		// },
 	}
 	pipeline := []bson.M{
 		{"$match": match},

@@ -5,7 +5,7 @@ import (
 	"github.com/ebusiness/go-disney/middleware"
 	"github.com/ebusiness/go-disney/v1/models"
 	"github.com/gin-gonic/gin"
-	"log"
+	// "log"
 	"math"
 	"sort"
 	"time"
@@ -146,7 +146,7 @@ func (control planController) getNotConflictShow(item models.ScheduleDaily, show
 	if res == nil {
 		return nil
 	}
-	log.Println(res)
+	// log.Println(res)
 
 	schedule := res.(models.Schedule)
 	route := linq.From(showRoutes).WhereT(func(showRoute models.PlanRoute) bool {

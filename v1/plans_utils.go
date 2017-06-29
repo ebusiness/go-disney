@@ -172,15 +172,19 @@ func (control planController) isValidWaittime(datetime, predictionTime time.Time
 func (control planController) getPlan(mongo middleware.Mongo, datetime time.Time) (models.PlanTemplate, error) {
 	model := models.Plan{}
 	collection := mongo.GetCollection(model)
-	err := collection.Find(bson.M{"template_id": bson.ObjectIdHex(control.id), "start": datetime, "lang": control.lang}).
-		One(&model)
+	err := collection.Find(bson.M{
+		"$or": []bson.M{
+			{"template_id": bson.ObjectIdHex(control.id)},
+			{"_id": bson.ObjectIdHex(control.id)},
+		},
+		"start": datetime,
+		"lang":  control.lang,
+	}).One(&model)
 	return model.PlanTemplate, err
 }
 
-func (control planController) cachePlan(mongo middleware.Mongo, template models.PlanTemplate) {
-	model := models.Plan{PlanTemplate: template, Lang: control.lang}
-	model.TemplateID = model.PlanTemplate.ID
-	model.PlanTemplate.ID = bson.NewObjectId()
+func (control planController) cachePlan(mongo middleware.Mongo, template models.PlanTemplate, templateID *bson.ObjectId) {
+	model := models.Plan{PlanTemplate: template, TemplateID: templateID, Lang: control.lang}
 	collection := mongo.GetCollection(model)
 	control.createIndex(collection)
 	collection.Insert(model)
