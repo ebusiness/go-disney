@@ -10,6 +10,7 @@ services:
 
 before_install:
   - go get -u github.com/golang/dep/cmd/dep
+  - go get -u github.com/kyoh86/richgo
 # - docker run -d --name redis -p 6379:6379 redis:alpine
 # - docker run -d --name mongo -p 27017:27017 mvertes/alpine-mongo
 

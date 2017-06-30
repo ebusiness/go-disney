@@ -4,10 +4,10 @@
 #
 # go test -v -covermode=count -coverprofile=coverage.v1.out v1/*.go
 
-go test -v middleware/*.go
+richgo test -v middleware/*.go
 
-go test -v v1/*.go
+richgo test -v v1/*.go
 
-go test -v v1/algorithms/*.go
+richgo test -v v1/algorithms/*.go
 
-go test -v utils/*.go
+richgo test -v utils/*.go
