@@ -27,6 +27,7 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 			}
 		}
 		if !sorted {
+			item.FastPass = nil //invalid fp
 			tempRoutes = append(tempRoutes, item)
 		}
 	}
@@ -56,9 +57,10 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 				//　TODO　it's should be next show's StrID or `item.StrID`
 				// set it to `item.StrID` temporary
 				insertItem := control.getItemWithsSchdule(mongo, item.StrID, datetime, waittime, sortItem)
-
-				resultRoute = append(resultRoute, insertItem)
-				datetime = sortItem.Schedule.EndTime
+				if insertItem != nil {
+					resultRoute = append(resultRoute, *insertItem)
+					datetime = insertItem.Schedule.EndTime
+				}
 				if len(sortRoutes) == 1 {
 					sortRoutes = []models.PlanRoute{}
 				} else {
@@ -67,41 +69,67 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 				continue
 			}
 		}
+		if len(nextID) == 0 && len(sortRoutes) > 0 {
+			nextID = sortRoutes[0].StrID
+		}
 		waittime := control.getPredictionWaittime(c, item, datetime)
-		item = control.getItemWithsSchdule(mongo, nextID, datetime, waittime, item)
+		item = *control.getItemWithsSchdule(mongo, nextID, datetime, waittime, item)
 		datetime = item.Schedule.EndTime
 
 		resultRoute = append(resultRoute, item)
 	}
-	for _, sortItem := range sortRoutes {
-		resultRoute = append(resultRoute, sortItem)
+
+	length = len(sortRoutes) - 1
+	for index, sortItem := range sortRoutes {
+
+		nextID := ""
+		if index < length {
+			nextID = sortRoutes[index+1].StrID
+		}
+		waittime := control.getPredictionWaittime(c, sortItem, datetime)
+		insertItem := control.getItemWithsSchdule(mongo, nextID, datetime, waittime, sortItem)
+		if insertItem != nil {
+			resultRoute = append(resultRoute, *insertItem)
+			datetime = insertItem.Schedule.EndTime
+		}
 	}
 	// log.Println(datetime) //end time
 	model.Route = resultRoute
 	return model
 }
 
-func (control planController) getItemWithsSchdule(mongo middleware.Mongo, nextID string, datetime time.Time, waittime float64, route models.PlanRoute) models.PlanRoute {
+func (control planController) getItemWithsSchdule(mongo middleware.Mongo, nextID string, datetime time.Time, waittime float64, route models.PlanRoute) *models.PlanRoute {
 	route.Schedule.StartTime = datetime
 
 	route.WaitTime = waittime
 	if route.FastPass != nil {
+		datetime.Before(*route.FastPass.Begin)
+		if datetime.Before(*route.FastPass.Begin) {
+			route.Schedule.StartTime = *route.FastPass.Begin
+		}
 		route.WaitTime = waittime * control.fastRate()
 	}
 	route.DistanceToNext = control.getDistanceToNext(mongo, route.StrID, nextID)
 	route.WalktimeToNext = math.Ceil(route.DistanceToNext / control.speed())
-	cost := route.TimeCost + route.WalktimeToNext + waittime
-	route.Schedule.EndTime = datetime.Add(time.Minute * time.Duration(cost))
+	cost := route.TimeCost + route.WalktimeToNext + route.WaitTime
+	route.Schedule.EndTime = route.Schedule.StartTime.Add(time.Minute * time.Duration(cost))
 
-	return route
+	if nil != route.FastPass && route.Schedule.EndTime.After(*route.FastPass.End) {
+		return nil
+	}
+
+	return &route
 }
 
 func (control planController) fpList(c *gin.Context, model models.PlanTemplate, datetime time.Time) []models.PlanRoute {
 	routes := []models.PlanRoute{}
 	linq.From(model.Route).WhereT(func(item models.PlanRoute) bool {
-		return item.FastPass != nil
+		return item.FastPass != nil && datetime.Before(*item.FastPass.End)
 	}).SelectT(func(item models.PlanRoute) models.PlanRoute {
 		item.Schedule.StartTime = *item.FastPass.Begin
+		if datetime.After(item.Schedule.StartTime) {
+			item.Schedule.StartTime = datetime
+		}
 		item.Schedule.EndTime = *item.FastPass.End
 		return item
 	}).ToSlice(&routes)
@@ -121,8 +149,10 @@ func (control planController) sortShow(c *gin.Context, model models.PlanTemplate
 
 	mongo := middleware.GetMongo(c)
 	schedules := control.getScheduleList(mongo, datetime, showIds)
+	// log.Println(schedules)
 
 	linq.From(schedules).ForEachT(func(item models.ScheduleDaily) {
+		// log.Println(item)
 		route := control.getNotConflictShow(item, showRoutes, routes)
 		if route == nil {
 			return

@@ -28,7 +28,8 @@ setup::install::dep() {
   if ! command -v dep >/dev/null; then
     setup::install::git
     echo "install dep"
-    go get -u github.com/golang/dep/...
+    # go get -u github.com/golang/dep/...
+    go get -u github.com/golang/dep/cmd/dep
   fi
 }
 
