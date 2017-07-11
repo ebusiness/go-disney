@@ -1,10 +1,9 @@
 package middleware
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 //CloseNotify - HTTP connection closed
@@ -12,8 +11,7 @@ func CloseNotify(c *gin.Context) {
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println("Handler finished without response body", err)
-				// log.Println("Error:", err)
+				log.Errorln("Handler finished without response body", err)
 			}
 		}()
 
@@ -25,7 +23,10 @@ func CloseNotify(c *gin.Context) {
 		if c.IsAborted() {
 			return
 		}
+
 		c.AbortWithStatus(http.StatusNotAcceptable) //406
 	}()
+
 	c.Next()
+
 }
