@@ -124,6 +124,7 @@ func (control planController) customize(c *gin.Context) {
 	attractions := []models.Attraction{}
 	pipeline := (utils.BsonCreator{}).
 		Append(bson.M{"$match": bson.M{"str_id": bson.M{"$in": ids}}}).
+		Append(bson.M{"$sort": bson.M{"m_areas_id": 1}}).
 		Append(bson.M{"$project": bson.M{
 			"str_id":           1,
 			"name":             "$name." + control.lang,
@@ -134,15 +135,18 @@ func (control planController) customize(c *gin.Context) {
 		Pipeline
 	mongo.GetCollection(attractions).Pipe(pipeline).All(&attractions)
 
-	for routeIndex := range model.Route {
-		id := model.Route[routeIndex].StrID
-		for _, item := range attractions {
-			if id == item.StrID {
+	routes := []models.PlanRoute{}
+	for _, item := range attractions {
+		for routeIndex := range model.Route {
+			if item.StrID == model.Route[routeIndex].StrID {
 				model.Route[routeIndex].Attraction = item
+				routes = append(routes, model.Route[routeIndex])
 				break
 			}
 		}
 	}
+	model.Route = routes
+
 	model = control.algonrithmsWaittime(c, model, *model.Start)
 	model.ID = bson.NewObjectId()
 
