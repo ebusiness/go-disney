@@ -8,25 +8,27 @@ import (
 
 //CloseNotify - HTTP connection closed
 func CloseNotify(c *gin.Context) {
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				log.Errorln("Handler finished without response body", err)
-			}
-		}()
 
-		<-c.Writer.CloseNotify()
-		if c.Writer.Written() {
-			return
-		}
-
-		if c.IsAborted() {
-			return
-		}
-
-		c.AbortWithStatus(http.StatusNotAcceptable) //406
-	}()
+	go cnListener(c)
 
 	c.Next()
+}
 
+func cnListener(c *gin.Context) {
+	defer cnDefer()
+
+	<-c.Writer.CloseNotify()
+	if c.Writer.Written() {
+		return
+	}
+	if c.IsAborted() {
+		return
+	}
+	c.AbortWithStatus(http.StatusNotAcceptable) //406
+}
+
+func cnDefer() {
+	if err := recover(); err != nil {
+		log.Errorln("Handler finished without response body", err)
+	}
 }

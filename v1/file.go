@@ -201,7 +201,7 @@ func (control fileController) getPlan(mongo middleware.Mongo) []bson.M {
 		},
 		{"$unwind": "$coord"},
 	}
-	log.Println(pipeline)
+	// log.Println(pipeline)
 
 	res := []bson.M{}
 	mongo.GetCollectionByName("cache_plans").Pipe(pipeline).All(&res)
