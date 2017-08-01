@@ -39,6 +39,7 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 		}
 		sortRoutes = append(sortRoutes, sortItem)
 	}
+
 	resultRoute := []models.PlanRoute{}
 	length := len(tempRoutes) - 1
 	for routeIndex, item := range tempRoutes {
@@ -99,7 +100,9 @@ func (control planController) algonrithmsWaittime(c *gin.Context, model models.P
 }
 
 func (control planController) getItemWithsSchdule(mongo middleware.Mongo, nextID string, datetime time.Time, waittime float64, route models.PlanRoute) *models.PlanRoute {
-	route.Schedule.StartTime = datetime
+	if route.Schedule.StartTime.Before(datetime) {
+		route.Schedule.StartTime = datetime
+	}
 
 	route.WaitTime = waittime
 	if route.FastPass != nil {
