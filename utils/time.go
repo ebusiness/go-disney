@@ -16,7 +16,8 @@ func Now() time.Time {
 
 // DatetimeOfDate -
 func DatetimeOfDate(datetime time.Time) time.Time {
-	return time.Date(datetime.Year(), datetime.Month(), datetime.Day(), 0, 0, 0, 0, jst)
+	tokyoTime := datetime.In(jst)
+	return time.Date(tokyoTime.Year(), tokyoTime.Month(), tokyoTime.Day(), 0, 0, 0, 0, jst)
 }
 
 // TokyoTime -
