@@ -121,10 +121,26 @@ func (control planController) customize(c *gin.Context) {
 		ids = append(ids, item.StrID)
 	})
 
+	sort := c.PostForm("sortby")
+	if "user" == sort {
+		model = control.sortByUser(ids, mongo, model)
+	} else {
+		direction := c.PostForm("direction")
+		model = control.sortByArea(ids, mongo, model, direction)
+	}
+
+	model = control.algonrithmsWaittime(c, model, *model.Start)
+	model.ID = bson.NewObjectId()
+
+	control.cachePlan(mongo, model, nil)
+	c.JSON(http.StatusOK, model)
+}
+
+func (control planController) getAttractionForCustomize(mongo middleware.Mongo, ms ...bson.M) []models.Attraction {
 	attractions := []models.Attraction{}
+
 	pipeline := (utils.BsonCreator{}).
-		Append(bson.M{"$match": bson.M{"str_id": bson.M{"$in": ids}}}).
-		Append(bson.M{"$sort": bson.M{"m_areas_id": 1}}).
+		Append(ms...).
 		Append(bson.M{"$project": bson.M{
 			"str_id":           1,
 			"name":             "$name." + control.lang,
@@ -133,7 +149,38 @@ func (control planController) customize(c *gin.Context) {
 			"is_available":     1,
 		}}).
 		Pipeline
+
 	mongo.GetCollection(attractions).Pipe(pipeline).All(&attractions)
+	return attractions
+}
+
+func (control planController) sortByUser(ids []string, mongo middleware.Mongo, model models.PlanTemplate) models.PlanTemplate {
+
+	attractions := control.getAttractionForCustomize(mongo,
+		bson.M{"$match": bson.M{"str_id": bson.M{"$in": ids}}},
+	)
+
+	for routeIndex := range model.Route {
+		id := model.Route[routeIndex].StrID
+		for _, item := range attractions {
+			if id == item.StrID {
+				model.Route[routeIndex].Attraction = item
+				break
+			}
+		}
+	}
+	return model
+}
+
+func (control planController) sortByArea(ids []string, mongo middleware.Mongo, model models.PlanTemplate, direction string) models.PlanTemplate {
+	directionInt := 1 // left
+	if "right" == direction {
+		directionInt = -1 // right
+	}
+	attractions := control.getAttractionForCustomize(mongo,
+		bson.M{"$match": bson.M{"str_id": bson.M{"$in": ids}}},
+		bson.M{"$sort": bson.M{"m_areas_id": directionInt}},
+	)
 
 	routes := []models.PlanRoute{}
 	for _, item := range attractions {
@@ -146,10 +193,5 @@ func (control planController) customize(c *gin.Context) {
 		}
 	}
 	model.Route = routes
-
-	model = control.algonrithmsWaittime(c, model, *model.Start)
-	model.ID = bson.NewObjectId()
-
-	control.cachePlan(mongo, model, nil)
-	c.JSON(http.StatusOK, model)
+	return model
 }
