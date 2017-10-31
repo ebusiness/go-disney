@@ -29,6 +29,7 @@ type Attraction struct {
 	Realtime      interface{}  `json:"realtime,omitempty" bson:"realtime,omitempty"`
 	HotIndex      float64      `json:"index_hot,omitempty" bson:"index_hot,omitempty"`
 	// IsFastpass    bool         `json:"is_fastpass,omitempty" bson:"is_fastpass,omitempty"`
+	Schedules []Schedule `json:"schedules,omitempty"`
 }
 
 type summaryTag struct {
