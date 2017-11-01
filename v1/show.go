@@ -79,6 +79,7 @@ func (control showController) list(c *gin.Context) {
 			// LookupWithUnwind("places", "park", "_id", "park", lang).
 
 		pipeline := control.getPipelineForShowSchedules(t, bsonCreator).Pipeline
+		pipeline = control.joinLocation(pipeline)
 
 		///////////////////////
 		// log.Println(pipeline)
@@ -198,6 +199,7 @@ func (control showController) detail(c *gin.Context) {
 			Append(bson.M{"$addFields": bson.M{"index_hot": "$hot.hot"}})
 
 		pipeline := control.getPipelineForShowSchedules(t, bsonCreator).Pipeline
+		pipeline = control.joinLocation(pipeline)
 
 		return pipeline, nil
 	}
@@ -264,5 +266,37 @@ func (control showController) lookupSummaryTags() []bson.M {
 			},
 		}}}).
 		Append(bson.M{"$replaceRoot": bson.M{"newRoot": "$old"}}).
+		Pipeline
+}
+
+
+
+func (control showController) joinLocation(pipeline []bson.M) []bson.M {
+	log.Println("attraction_location")
+	return (utils.BsonCreator{}).
+		Append(pipeline...).
+		Lookup("attraction_location", "str_id", "str_id", "location").
+		Append(bson.M{"$addFields": bson.M{
+			"location": bson.M{
+				"$cond": bson.M{
+					"if": bson.M{"$eq": []interface{}{
+						0, bson.M{
+							"$size": "$location",
+						},
+					},
+					},
+					"then": []bson.M{{"str_id": "$str_id"}},
+					"else": "$location",
+				},
+			},
+		}}).
+		Append(
+			bson.M{
+				"$unwind": "$location",
+			},
+		).
+		Append(bson.M{"$addFields": bson.M{
+			"coordinates" : "$location.coordinates",
+		}}).
 		Pipeline
 }

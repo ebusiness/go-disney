@@ -30,6 +30,7 @@ type Attraction struct {
 	HotIndex      float64      `json:"index_hot,omitempty" bson:"index_hot,omitempty"`
 	// IsFastpass    bool         `json:"is_fastpass,omitempty" bson:"is_fastpass,omitempty"`
 	Schedules []Schedule `json:"schedules,omitempty"`
+	Coordinates    []float64 `json:"coordinates,omitempty" bson:"coordinates,omitempty"`
 }
 
 type summaryTag struct {

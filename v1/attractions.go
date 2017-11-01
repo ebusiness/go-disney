@@ -61,7 +61,7 @@ func (control attractionController) list(c *gin.Context) {
 			// LookupWithUnwind("places", "park", "_id", "park", lang).
 			// GraphLookup("tags", "$tag_ids", "tag_ids", "_id", "tags").
 			Pipeline
-
+		pipeline = control.joinLocation(pipeline)
 		sortQuery := c.Query("sort")
 		if sortQuery == "hot" {
 			pipeline = (utils.BsonCreator{}).
@@ -79,12 +79,44 @@ func (control attractionController) list(c *gin.Context) {
 		mongo := middleware.GetMongo(c)
 		collection := mongo.GetCollection(models)
 
-		// res := []bson.M{}
-		// log.Println("test")
 		err := collection.Pipe(pipeline).All(&models)
 		return models, err
+		// res := []bson.M{}
+		// // log.Println("test")
+		// err := collection.Pipe(pipeline).All(&res)
+		// return res, err
 	}
 	utils.Executor(c).Waterfall(getPipeline, exec)
+}
+
+func (control attractionController) joinLocation(pipeline []bson.M) []bson.M {
+	log.Println("attraction_location")
+	return (utils.BsonCreator{}).
+		Append(pipeline...).
+		Lookup("attraction_location", "str_id", "str_id", "location").
+		Append(bson.M{"$addFields": bson.M{
+			"location": bson.M{
+				"$cond": bson.M{
+					"if": bson.M{"$eq": []interface{}{
+						0, bson.M{
+							"$size": "$location",
+						},
+					},
+					},
+					"then": []bson.M{{"str_id": "$str_id"}},
+					"else": "$location",
+				},
+			},
+		}}).
+		Append(
+			bson.M{
+				"$unwind": "$location",
+			},
+		).
+		Append(bson.M{"$addFields": bson.M{
+			"coordinates" : "$location.coordinates",
+		}}).
+		Pipeline
 }
 
 func (control attractionController) detail(c *gin.Context) {
@@ -98,7 +130,7 @@ func (control attractionController) detail(c *gin.Context) {
 		basonMatchID := bson.M{"$match": bson.M{"str_id": control.id}} //bson.ObjectIdHex(control.id)}}
 		project := control.commonProject(c, bson.M{"tag_ids": 1, "limited": 1, "youtube_url": 1, "summary_tag_ids": 1, "summaries": 1})
 
-		return (utils.BsonCreator{}).
+		pipeline := (utils.BsonCreator{}).
 			Append(basonMatchID, project).
 			LookupWithUnwind("areas", "area", "_id", "area", control.lang).
 			GraphLookup("limiteds", "$limited", "limited", "_id", "limited", control.lang).
@@ -106,7 +138,9 @@ func (control attractionController) detail(c *gin.Context) {
 			Append(control.lookupSummaryTags()...).
 			LookupWithUnwind("attractions_hot", "str_id", "str_id", "hot", "").
 			Append(bson.M{"$addFields": bson.M{"index_hot": "$hot.hot"}}).
-			Pipeline, nil
+			Pipeline
+		pipeline = control.joinLocation(pipeline)
+		return pipeline, nil
 	}
 	exec := func(param interface{}) (interface{}, error) {
 		pipeline := param.([]bson.M)
