@@ -1,8 +1,17 @@
+FROM golang:alpine AS GOALPINE
+
+# ENV GIN_MODE=release
+
+COPY ./ /go/src/github.com/e-business/go-disney
+RUN cd /go/src/github.com/e-business/go-disney && \
+    sh scripts/setup.sh && \
+    go build -o /server main.go
+
 FROM alpine:latest
 
-MAINTAINER Wang Xinguang <wangxinguang@e-business.co.jp>
+LABEL maintainer: Wang Xinguang <wangxinguang@e-business.co.jp>
 
-COPY server /usr/bin/server
+COPY --from=GOALPINE /server /usr/bin/server
 COPY asset /asset
 
 # RUN apk add --update tzdata && \
