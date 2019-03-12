@@ -52,10 +52,40 @@ func (h holiday) getName(y, m, d, w int) string {
 		return "即位の礼正殿の儀"
 	} else if y == 1993 && m == 6 && d == 9 {
 		return "皇太子・徳仁親王の結婚の儀"
+	} else if y == 2019 && m == 4 && d == 30 {
+		return "国民の休日"
+	} else if y == 2019 && m == 5 && d == 1 {
+		return "天皇の即位の日"
+	} else if y == 2019 && m == 5 && d == 2 {
+		return "国民の休日"
+	} else if y == 2019 && m == 10 && d == 22 {
+		return "即位の礼正殿の儀"
+	}
+	olympic := h.getTokyoOlympic(y, m, d, w)
+	if len(olympic) > 0 {
+		return olympic
 	}
 	return h.getHolidayName(y, m, d, w)
 }
 
+func (h holiday) getTokyoOlympic(y, m, d, w int) string {
+	if y != 2020 {
+		return ""
+	}
+	// 東京オリンピック 特別措置法
+	if m == 7 {
+		if d == 23 {
+			return "海の日"
+		} else if d == 24 {
+			return "スポーツの日"
+		}
+	} else if m == 8 {
+		if d == 10 {
+			return "山の日"
+		}
+	}
+	return ""
+}
 func (h holiday) getHolidayName(y, m, d, w int) string {
 	name := h.getHolidayNameOfJanuary(y, m, d, w)
 	if len(name) == 0 {
@@ -110,10 +140,14 @@ func (h holiday) getHolidayNameOfJanuary(y, m, d, w int) string {
 	return ""
 }
 func (h holiday) getHolidayNameOfFebruary(y, m, d, w int) string {
-	if m != 2 || 1967 > y {
+	if m != 2 {
 		return ""
 	}
-	if d == 11 {
+
+	if 2020 <= y && d == 23 {
+		return "天皇誕生日"
+	}
+	if 1967 <= y && d == 11 {
 		return "建国記念の日"
 	}
 	return ""
@@ -173,7 +207,7 @@ func (h holiday) getHolidayNameOfJuly(y, m, d, w int) string {
 			return "海の日"
 		}
 	} else if 2003 <= y {
-		if 15 <= d && d <= 21 && w == 0 {
+		if 15 <= d && d <= 21 && w == 0 && y != 2020 {
 			return "海の日"
 		}
 	}
@@ -184,7 +218,7 @@ func (h holiday) getHolidayNameOfAugust(y, m, d, w int) string {
 		return ""
 	}
 	if 2016 <= y {
-		if d == 11 {
+		if d == 11 && y != 2020 {
 			return "山の日"
 		}
 	}
@@ -242,7 +276,7 @@ func (h holiday) getHolidayNameOfOctober(y, m, d, w int) string {
 			return "体育の日"
 		}
 	} else if 2000 <= y {
-		if 8 <= d && d <= 14 && w == 0 {
+		if 8 <= d && d <= 14 && w == 0 && y != 2020 {
 			return "体育の日"
 		}
 	}
@@ -263,7 +297,7 @@ func (h holiday) getHolidayNameOfDecember(y, m, d, w int) string {
 	if m != 12 {
 		return ""
 	}
-	if 1989 <= y && d == 23 {
+	if 1989 <= y && y <= 2018 && d == 23 {
 		return "天皇誕生日"
 	}
 	return ""
