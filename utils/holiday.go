@@ -277,6 +277,9 @@ func (h holiday) getHolidayNameOfOctober(y, m, d, w int) string {
 		}
 	} else if 2000 <= y {
 		if 8 <= d && d <= 14 && w == 0 && y != 2020 {
+			if 2020 <= y {
+				return "スポーツの日"
+			}
 			return "体育の日"
 		}
 	}
